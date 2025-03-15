@@ -1,0 +1,22 @@
+{
+  "name": "ai-rule-forge",
+  "version": "0.1.0",
+  "description": "AI Document Management. Manage rules for GitHub Copilot, Cline, Cursor, and other AI tools.",
+  "bin": {
+    "ai-rule-forge": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "src/templates"
+  ],
+  "scripts": {
+    "build": "tsc && chmod +x ./dist/cli.js",
+    "compile": "tsx src/cli.ts compile",
+    "preview": "tsx src/cli.ts preview"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

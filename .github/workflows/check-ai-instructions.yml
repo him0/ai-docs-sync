@@ -1,0 +1,63 @@
+name: Check AI Instructions
+
+on:
+  pull_request:
+    paths:
+      - '.clinerules'
+      - '.cursorrules'
+      - '.github/copilot-instructions.md'
+  push:
+    paths:
+      - '.clinerules'
+      - '.cursorrules'
+      - '.github/copilot-instructions.md'
+    branches:
+      - main
+
+jobs:
+  check-instructions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        working-directory: ai-docs
+        run: |
+          pnpm install --frozen-lockfile
+
+      - name: Check if instructions are directly modified
+        run: |
+          # Generate temp files for comparison
+          cp .clinerules .clinerules.temp
+          cp .cursorrules .cursorrules.temp
+          cp .github/copilot-instructions.md .github/copilot-instructions.temp
+
+          # Build new instructions
+          cd ai-docs
+          pnpm build
+          cd ..
+
+          # Compare files
+          if ! cmp -s .clinerules .clinerules.temp; then
+            echo "Error: .clinerules has been modified directly. Please update ai/rules instead."
+            exit 1
+          fi
+
+          if ! cmp -s .cursorrules .cursorrules.temp; then
+            echo "Error: .cursorrules has been modified directly. Please update ai/rules instead."
+            exit 1
+          fi
+
+          if ! cmp -s .github/copilot-instructions.md .github/copilot-instructions.temp; then
+            echo "Error: copilot-instructions.md has been modified directly. Please update ai/rules instead."
+            exit 1
+          fi
