@@ -11,6 +11,7 @@
   ],
   "scripts": {
     "build": "tsc && chmod +x ./dist/cli.js",
+    "init": "tsx src/cli.ts init",
     "compile": "tsx src/cli.ts compile",
     "preview": "tsx src/cli.ts preview"
   },
