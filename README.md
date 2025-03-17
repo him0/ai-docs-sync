@@ -19,6 +19,7 @@ This command will:
 - Create the `ai-docs/_rules/` directory
 - Create basic rule files
 - Create necessary configuration files
+- Create the `ai-docs/ignore` file for defining ignore patterns
 ```
 
 
@@ -37,6 +38,11 @@ This command reads rule files from the `ai-docs/_rules/` directory and generates
 - `.github/copilot-instructions.md` (for GitHub Copilot)
 - `.clinerules` (for Cline)
 - `.cursorrules` (for Cursor)
+
+It also reads the `ai-docs/ignore` file and generates:
+- `.copilotignore` (for GitHub Copilot)
+- `.clineignore` (for Cline)
+- `.cursorignore` (for Cursor)
 
 ### Preview
 
@@ -60,3 +66,20 @@ This section applies only to Cline.
 # General Guidelines
 This section applies to all AI tools.
 ```
+
+## Ignore Patterns
+
+Edit the `ai-docs/ignore` file to define patterns that should be ignored by AI tools:
+
+```
+# Ignore patterns for AI assistants
+node_modules/
+dist/
+.env
+*.log
+```
+
+When you run the `compile` command, these patterns will be copied to:
+- `.copilotignore` (for GitHub Copilot)
+- `.clineignore` (for Cline)
+- `.cursorignore` (for Cursor)

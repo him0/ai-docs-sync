@@ -20,7 +20,7 @@ Usage:
 
 Commands:
   init     - Initialize a new ${DEFAULT_AI_DOCS_DIR} project
-  compile  - Compile rules from ${DEFAULT_AI_DOCS_DIR}/${DEFAULT_RULES_DIR} to output files
+  compile  - Compile rules from ${DEFAULT_AI_DOCS_DIR}/${DEFAULT_RULES_DIR} to output files and generate ignore files
   preview  - Preview rules without writing to output files
   help     - Show this help message
   `);
@@ -82,6 +82,13 @@ const initProject = () => {
   ensureDir(aiDocsDir);
   ensureDir(rulesDir);
 
+  // Create ignore file
+  const ignoreFilePath = join(aiDocsDir, 'ignore');
+  if (!existsSync(ignoreFilePath)) {
+    writeFileSync(ignoreFilePath, '# Ignore patterns for AI assistants\n');
+    console.log(`📄 Created file: ${ignoreFilePath}`);
+  }
+
   // Copy template rules directory
   const templatesDir = join(__dirname, '..', 'src', 'templates');
   const templateRulesDir = join(templatesDir, DEFAULT_RULES_DIR);
@@ -96,8 +103,9 @@ const initProject = () => {
   console.log(`✅ ${DEFAULT_AI_DOCS_DIR} project initialization complete!`);
   console.log('Next steps:');
   console.log(`1. Edit rules: modify files in the ${DEFAULT_AI_DOCS_DIR}/${DEFAULT_RULES_DIR}/ directory`);
-  console.log('2. Compile: npx ai-rule-forge compile');
-  console.log('3. Preview: npx ai-rule-forge preview');
+  console.log(`2. Edit ignore patterns: modify the ${DEFAULT_AI_DOCS_DIR}/ignore file`);
+  console.log('3. Compile: npx ai-rule-forge compile');
+  console.log('4. Preview: npx ai-rule-forge preview');
 };
 
 // Function to filter content based on prefix
@@ -211,6 +219,20 @@ const compileRules = () => {
   try {
     // Use internal function instead of executing compile.js
     generateRuleFiles(join(currentDir, DEFAULT_AI_DOCS_DIR), currentDir);
+
+    // Generate ignore files
+    const ignoreFilePath = join(aiDocsDir, 'ignore');
+    if (existsSync(ignoreFilePath)) {
+      const ignoreContent = readFileSync(ignoreFilePath, 'utf-8');
+
+      // Create ignore files for each prefix
+      RULE_PREFIXES.forEach(prefix => {
+        const outputPath = join(currentDir, `.${prefix}ignore`);
+        writeFileSync(outputPath, ignoreContent);
+        console.log(`📄 Generated: ${outputPath}`);
+      });
+    }
+
     console.log('✅ Rules compiled successfully!');
   } catch (error) {
     console.error('❌ Error compiling rules:', error);
