@@ -63,6 +63,9 @@ This section applies only to GitHub Copilot.
 # Communication [cline]
 This section applies only to Cline.
 
+# Development [cursor]
+This section applies only to Cursor.
+
 # General Guidelines
 This section applies to all AI tools.
 ```
