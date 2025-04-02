@@ -9,11 +9,6 @@ const DEFAULT_AI_DOCS_DIR = 'ai-docs';
 const DEFAULT_RULES_DIR = '_rules';
 // Parse command line arguments
 const command = process.argv[2];
-// Get argument value helper function
-const getArgValue = (argName) => {
-    const argIndex = process.argv.findIndex(arg => arg === argName);
-    return argIndex !== -1 && argIndex < process.argv.length - 1 ? process.argv[argIndex + 1] : undefined;
-};
 // Help message
 const showHelp = () => {
     console.log(`
@@ -24,7 +19,7 @@ Usage:
 
 Commands:
   init     - Initialize a new ${DEFAULT_AI_DOCS_DIR} project
-  compile  - Compile rules from ${DEFAULT_AI_DOCS_DIR}/${DEFAULT_RULES_DIR} to output files
+  compile  - Compile rules from ${DEFAULT_AI_DOCS_DIR}/${DEFAULT_RULES_DIR} to output files and generate ignore files
   preview  - Preview rules without writing to output files
   help     - Show this help message
   `);
@@ -67,17 +62,6 @@ const copyDirRecursive = (source, target) => {
     }
     return true;
 };
-// Create file if it doesn't exist
-const createFileIfNotExists = (target, content) => {
-    if (!(0, fs_1.existsSync)(target)) {
-        ensureDir((0, path_1.dirname)(target));
-        (0, fs_1.writeFileSync)(target, content);
-        console.log(`📝 Created file: ${target}`);
-        return true;
-    }
-    console.log(`⚠️ File already exists (skipped): ${target}`);
-    return false;
-};
 // Implementation of init command
 const initProject = () => {
     const currentDir = process.cwd();
@@ -86,6 +70,12 @@ const initProject = () => {
     const rulesDir = (0, path_1.join)(aiDocsDir, DEFAULT_RULES_DIR);
     ensureDir(aiDocsDir);
     ensureDir(rulesDir);
+    // Create ignore file
+    const ignoreFilePath = (0, path_1.join)(aiDocsDir, 'ignore');
+    if (!(0, fs_1.existsSync)(ignoreFilePath)) {
+        (0, fs_1.writeFileSync)(ignoreFilePath, '# Ignore patterns for AI assistants\n');
+        console.log(`📄 Created file: ${ignoreFilePath}`);
+    }
     // Copy template rules directory
     const templatesDir = (0, path_1.join)(__dirname, '..', 'src', 'templates');
     const templateRulesDir = (0, path_1.join)(templatesDir, DEFAULT_RULES_DIR);
@@ -99,8 +89,9 @@ const initProject = () => {
     console.log(`✅ ${DEFAULT_AI_DOCS_DIR} project initialization complete!`);
     console.log('Next steps:');
     console.log(`1. Edit rules: modify files in the ${DEFAULT_AI_DOCS_DIR}/${DEFAULT_RULES_DIR}/ directory`);
-    console.log('2. Compile: npx ai-rule-forge compile');
-    console.log('3. Preview: npx ai-rule-forge preview');
+    console.log(`2. Edit ignore patterns: modify the ${DEFAULT_AI_DOCS_DIR}/ignore file`);
+    console.log('3. Compile: npx ai-rule-forge compile');
+    console.log('4. Preview: npx ai-rule-forge preview');
 };
 // Function to filter content based on prefix
 const filterContentByPrefix = (content, prefix) => {
@@ -203,6 +194,17 @@ const compileRules = () => {
     try {
         // Use internal function instead of executing compile.js
         generateRuleFiles((0, path_1.join)(currentDir, DEFAULT_AI_DOCS_DIR), currentDir);
+        // Generate ignore files
+        const ignoreFilePath = (0, path_1.join)(aiDocsDir, 'ignore');
+        if ((0, fs_1.existsSync)(ignoreFilePath)) {
+            const ignoreContent = (0, fs_1.readFileSync)(ignoreFilePath, 'utf-8');
+            // Create ignore files for each prefix
+            RULE_PREFIXES.forEach(prefix => {
+                const outputPath = (0, path_1.join)(currentDir, `.${prefix}ignore`);
+                (0, fs_1.writeFileSync)(outputPath, ignoreContent);
+                console.log(`📄 Generated: ${outputPath}`);
+            });
+        }
         console.log('✅ Rules compiled successfully!');
     }
     catch (error) {
