@@ -1,11 +1,21 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, copyFileSync, writeFileSync, readFileSync, readdirSync } from 'fs';
-import { join, dirname } from 'path';
+import {
+  existsSync,
+  mkdirSync,
+  copyFileSync,
+  writeFileSync,
+  readFileSync,
+  readdirSync,
+  symlinkSync,
+  unlinkSync,
+  lstatSync,
+} from "fs";
+import { join, dirname } from "path";
 
 // Constants for rule compilation
-const RULE_PREFIXES = ['copilot', 'cline', 'cursor'];
-const DEFAULT_AI_DOCS_DIR = 'ai-docs';
-const DEFAULT_RULES_DIR = '_rules';
+const RULE_PREFIXES = ["copilot", "cline", "cursor"];
+const DEFAULT_AI_DOCS_DIR = "ai-docs";
+const DEFAULT_RULES_DIR = "_rules";
 
 // Parse command line arguments
 const command = process.argv[2];
@@ -20,8 +30,8 @@ Usage:
 
 Commands:
   init     - Initialize a new ${DEFAULT_AI_DOCS_DIR} project
-  compile  - Compile rules from ${DEFAULT_AI_DOCS_DIR}/${DEFAULT_RULES_DIR} to output files and generate ignore files
-  preview  - Preview rules without writing to output files
+  compile  - Create symlink from ${DEFAULT_AI_DOCS_DIR}/${DEFAULT_RULES_DIR} to .clinerules and generate .cursorrules and .github/copilot-instructions.md files
+  preview  - Preview rules without creating symlink or files
   help     - Show this help message
   `);
 };
@@ -83,68 +93,120 @@ const initProject = () => {
   ensureDir(rulesDir);
 
   // Create ignore file
-  const ignoreFilePath = join(aiDocsDir, 'ignore');
+  const ignoreFilePath = join(aiDocsDir, "ignore");
   if (!existsSync(ignoreFilePath)) {
-    writeFileSync(ignoreFilePath, '# Ignore patterns for AI assistants\n');
+    writeFileSync(ignoreFilePath, "# Ignore patterns for AI assistants\n");
     console.log(`📄 Created file: ${ignoreFilePath}`);
   }
 
   // Copy template rules directory
-  const templatesDir = join(__dirname, '..', 'src', 'templates');
+  const templatesDir = join(__dirname, "..", "src", "templates");
   const templateRulesDir = join(templatesDir, DEFAULT_RULES_DIR);
 
   if (existsSync(templateRulesDir)) {
-    console.log('📂 Copying rules templates...');
+    console.log("📂 Copying rules templates...");
     copyDirRecursive(templateRulesDir, rulesDir);
   } else {
-    console.warn('⚠️ Template rules directory not found:', templateRulesDir);
+    console.warn("⚠️ Template rules directory not found:", templateRulesDir);
   }
 
   console.log(`✅ ${DEFAULT_AI_DOCS_DIR} project initialization complete!`);
-  console.log('Next steps:');
-  console.log(`1. Edit rules: modify files in the ${DEFAULT_AI_DOCS_DIR}/${DEFAULT_RULES_DIR}/ directory`);
-  console.log(`2. Edit ignore patterns: modify the ${DEFAULT_AI_DOCS_DIR}/ignore file`);
-  console.log('3. Compile: npx ai-rule-forge compile');
-  console.log('4. Preview: npx ai-rule-forge preview');
+  console.log("Next steps:");
+  console.log(
+    `1. Edit rules: modify files in the ${DEFAULT_AI_DOCS_DIR}/${DEFAULT_RULES_DIR}/ directory`
+  );
+  console.log(
+    `2. Edit ignore patterns: modify the ${DEFAULT_AI_DOCS_DIR}/ignore file`
+  );
+  console.log("3. Create symlink and files: npx ai-rule-forge compile");
+  console.log("4. Preview rules: npx ai-rule-forge preview");
 };
 
 // Function to filter content based on prefix
 const filterContentByPrefix = (content: string, prefix: string): string => {
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const result: string[] = [];
   let includeSection = true;
   let inSection = false;
 
   for (const line of lines) {
-    if (line.startsWith('#')) {
+    if (line.startsWith("#")) {
       // Start of a new section
       inSection = false;
       if (line.includes(`[${prefix}]`)) {
         includeSection = true;
         inSection = true;
-        result.push(line.replace(`[${prefix}]`, '').trim());
-      } else if (line.includes('[')) {
+        result.push(line.replace(`[${prefix}]`, "").trim());
+      } else if (line.includes("[")) {
         includeSection = false;
       } else {
         includeSection = !inSection;
         result.push(line);
       }
-    } else if (includeSection && line.trim() !== '') {
+    } else if (includeSection && line.trim() !== "") {
       result.push(line);
     }
   }
 
-  return result.join('\n');
-}
+  return result.join("\n");
+};
+
+// Create symlink if it doesn't exist, or replace if it does
+const createSymlink = (source: string, target: string) => {
+  // Check if target already exists
+  if (existsSync(target)) {
+    // If it's a symlink, remove it
+    if (lstatSync(target).isSymbolicLink()) {
+      unlinkSync(target);
+      console.log(`🔄 Removed existing symlink: ${target}`);
+    } else {
+      // If it's a file, error out
+      console.error(
+        `❌ Cannot create symlink: ${target} already exists as a file`
+      );
+      return false;
+    }
+  }
+
+  // Ensure parent directory exists
+  ensureDir(dirname(target));
+
+  // Create symlink
+  try {
+    symlinkSync(source, target, "dir");
+    console.log(`🔗 Created symlink: ${target} -> ${source}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Failed to create symlink: ${error}`);
+    return false;
+  }
+};
+
+// Check if .clinerules file exists
+const checkClineruleFileExists = (outputRootDir: string) => {
+  const path = join(outputRootDir, ".clinerules");
+
+  if (existsSync(path) && !lstatSync(path).isSymbolicLink()) {
+    console.error(`❌ File already exists: ${path}`);
+    console.error(`   Please remove it before creating symlink.`);
+    return true;
+  }
+
+  return false;
+};
 
 // Generate rule files
-const generateRuleFiles = (inputRootDir: string, outputRootDir: string, preview: boolean = false) => {
+const generateRuleFiles = (
+  inputRootDir: string,
+  outputRootDir: string,
+  preview: boolean = false
+) => {
   // Define paths
   const RULES_DIR = join(inputRootDir, DEFAULT_RULES_DIR);
   const OUTPUT_PATHS = {
-    copilot: join(outputRootDir, '.github', 'copilot-instructions.md'),
-    cline: join(outputRootDir, '.clinerules'),
-    cursor: join(outputRootDir, '.cursorrules')
+    copilot: join(outputRootDir, ".github", "copilot-instructions.md"),
+    cline: join(outputRootDir, ".clinerules"),
+    cursor: join(outputRootDir, ".cursorrules"),
   };
 
   // Check if rules directory exists
@@ -155,7 +217,7 @@ const generateRuleFiles = (inputRootDir: string, outputRootDir: string, preview:
 
   // Load and concatenate rule files
   const ruleFiles = readdirSync(RULES_DIR)
-    .filter(file => file.endsWith('.md'))
+    .filter((file) => file.endsWith(".md"))
     .sort();
 
   if (ruleFiles.length === 0) {
@@ -163,14 +225,14 @@ const generateRuleFiles = (inputRootDir: string, outputRootDir: string, preview:
   }
 
   // Generate content for each prefix
-  const contents = RULE_PREFIXES.map(prefix => {
+  const contents = RULE_PREFIXES.map((prefix) => {
     const filteredContent = ruleFiles
-      .map(file => {
-        const content = readFileSync(join(RULES_DIR, file), 'utf-8');
+      .map((file) => {
+        const content = readFileSync(join(RULES_DIR, file), "utf-8");
         return filterContentByPrefix(content, prefix);
       })
-      .filter(content => content.trim() !== '')
-      .join('\n\n');
+      .filter((content) => content.trim() !== "")
+      .join("\n\n");
     return { prefix, content: filteredContent };
   });
 
@@ -179,25 +241,28 @@ const generateRuleFiles = (inputRootDir: string, outputRootDir: string, preview:
     contents.forEach(({ prefix, content }) => {
       console.log(`\n=== ${prefix.toUpperCase()} PREVIEW ===\n`);
       console.log(content);
-      console.log('\n=== END PREVIEW ===\n');
+      console.log("\n=== END PREVIEW ===\n");
     });
   } else {
     // Actual file generation
     // Create output directories
-    Object.values(OUTPUT_PATHS).forEach(path => {
+    Object.values(OUTPUT_PATHS).forEach((path) => {
       mkdirSync(dirname(path), { recursive: true });
     });
 
     // Write files
     contents.forEach(({ prefix, content }) => {
-      writeFileSync(OUTPUT_PATHS[prefix as keyof typeof OUTPUT_PATHS], content + '\n');
+      writeFileSync(
+        OUTPUT_PATHS[prefix as keyof typeof OUTPUT_PATHS],
+        content + "\n"
+      );
     });
 
-    console.log('✨ Generated files successfully!');
+    console.log("✨ Generated files successfully!");
   }
 
   // Log directories if specified
-  if (outputRootDir !== '.') {
+  if (outputRootDir !== ".") {
     console.log(`📁 Using output directory: ${outputRootDir}`);
   }
   if (inputRootDir !== `./${DEFAULT_AI_DOCS_DIR}`) {
@@ -209,33 +274,98 @@ const generateRuleFiles = (inputRootDir: string, outputRootDir: string, preview:
 const compileRules = () => {
   const currentDir = process.cwd();
   const aiDocsDir = join(currentDir, DEFAULT_AI_DOCS_DIR);
+  const rulesDir = join(aiDocsDir, DEFAULT_RULES_DIR);
 
   if (!existsSync(aiDocsDir)) {
-    console.error(`❌ ${DEFAULT_AI_DOCS_DIR} directory not found. Please run ai-rule-forge init first.`);
+    console.error(
+      `❌ ${DEFAULT_AI_DOCS_DIR} directory not found. Please run ai-rule-forge init first.`
+    );
     process.exit(1);
   }
 
-  console.log('🔄 Compiling rules...');
+  if (!existsSync(rulesDir)) {
+    console.error(`❌ Rules directory not found: ${rulesDir}`);
+    process.exit(1);
+  }
+
+  console.log("🔄 Compiling rules...");
   try {
-    // Use internal function instead of executing compile.js
-    generateRuleFiles(join(currentDir, DEFAULT_AI_DOCS_DIR), currentDir);
+    // Check if .clinerules file already exists
+    if (checkClineruleFileExists(currentDir)) {
+      console.error("❌ Cannot create symlink due to existing file.");
+      console.error("   Please remove the file listed above and try again.");
+      process.exit(1);
+    }
+
+    // Create .clinerules symlink
+    let success = createSymlink(rulesDir, join(currentDir, ".clinerules"));
+
+    // Generate rule files for other prefixes
+    const RULES_DIR = join(aiDocsDir, DEFAULT_RULES_DIR);
+
+    // Load and concatenate rule files
+    const ruleFiles = readdirSync(RULES_DIR)
+      .filter((file) => file.endsWith(".md"))
+      .sort();
+
+    if (ruleFiles.length === 0) {
+      console.warn(`⚠️ No rule files found in ${RULES_DIR}`);
+    }
+
+    // Generate content for cursor and copilot
+    const contents = ["cursor", "copilot"].map((prefix) => {
+      const filteredContent = ruleFiles
+        .map((file) => {
+          const content = readFileSync(join(RULES_DIR, file), "utf-8");
+          return filterContentByPrefix(content, prefix);
+        })
+        .filter((content) => content.trim() !== "")
+        .join("\n\n");
+      return { prefix, content: filteredContent };
+    });
+
+    // Create output directories
+    const OUTPUT_PATHS = {
+      copilot: join(currentDir, ".github", "copilot-instructions.md"),
+      cursor: join(currentDir, ".cursorrules"),
+    };
+
+    Object.values(OUTPUT_PATHS).forEach((path) => {
+      mkdirSync(dirname(path), { recursive: true });
+    });
+
+    // Write files
+    contents.forEach(({ prefix, content }) => {
+      writeFileSync(
+        OUTPUT_PATHS[prefix as "copilot" | "cursor"],
+        content + "\n"
+      );
+      console.log(
+        `📄 Generated: ${OUTPUT_PATHS[prefix as "copilot" | "cursor"]}`
+      );
+    });
 
     // Generate ignore files
-    const ignoreFilePath = join(aiDocsDir, 'ignore');
+    const ignoreFilePath = join(aiDocsDir, "ignore");
     if (existsSync(ignoreFilePath)) {
-      const ignoreContent = readFileSync(ignoreFilePath, 'utf-8');
+      const ignoreContent = readFileSync(ignoreFilePath, "utf-8");
 
       // Create ignore files for each prefix
-      RULE_PREFIXES.forEach(prefix => {
+      RULE_PREFIXES.forEach((prefix) => {
         const outputPath = join(currentDir, `.${prefix}ignore`);
         writeFileSync(outputPath, ignoreContent);
         console.log(`📄 Generated: ${outputPath}`);
       });
     }
 
-    console.log('✅ Rules compiled successfully!');
+    if (success) {
+      console.log("✅ Rules compiled successfully!");
+    } else {
+      console.error("⚠️ Symlink could not be created.");
+      process.exit(1);
+    }
   } catch (error) {
-    console.error('❌ Error compiling rules:', error);
+    console.error("❌ Error compiling rules:", error);
     process.exit(1);
   }
 };
@@ -246,40 +376,41 @@ const previewRules = () => {
   const aiDocsDir = join(currentDir, DEFAULT_AI_DOCS_DIR);
 
   if (!existsSync(aiDocsDir)) {
-    console.error(`❌ ${DEFAULT_AI_DOCS_DIR} directory not found. Please run ai-rule-forge init first.`);
+    console.error(
+      `❌ ${DEFAULT_AI_DOCS_DIR} directory not found. Please run ai-rule-forge init first.`
+    );
     process.exit(1);
   }
 
-  console.log('🔍 Previewing rules...');
+  console.log("🔍 Previewing rules...");
   try {
     // Use internal function instead of executing compile.js
     generateRuleFiles(join(currentDir, DEFAULT_AI_DOCS_DIR), currentDir, true);
-    console.log('✅ Rules preview completed!');
+    console.log("✅ Rules preview completed!");
   } catch (error) {
-    console.error('❌ Error previewing rules:', error);
+    console.error("❌ Error previewing rules:", error);
     process.exit(1);
   }
 };
 
-
 // Main processing
 switch (command) {
-  case 'init':
+  case "init":
     initProject();
     break;
-  case 'compile':
+  case "compile":
     compileRules();
     break;
-  case 'preview':
+  case "preview":
     previewRules();
     break;
-  case 'help':
-  case '--help':
-  case '-h':
+  case "help":
+  case "--help":
+  case "-h":
     showHelp();
     break;
   default:
-    console.log('❓ Unknown command: ' + command);
+    console.log("❓ Unknown command: " + command);
     showHelp();
     process.exit(1);
 }
