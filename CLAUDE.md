@@ -21,12 +21,12 @@ AI Rule Forge is a CLI tool for managing rules and configuration files for vario
 - Template system: `src/templates/_rules/` contains default rule templates
 
 ### Rule Compilation Process
-1. Reads Markdown files from `ai-docs/_rules/` directory
+1. Reads Markdown files from `ai-docs/_rules/` directory (sorted alphabetically)
 2. Filters content based on tool-specific prefixes: `[copilot]`, `[cline]`, `[cursor]`
 3. Generates tool-specific output files:
-   - `.github/copilot-instructions.md` (GitHub Copilot)
-   - `.clinerules` (Cline)
-   - `.cursorrules` (Cursor)
+   - `.github/copilot-instructions.md` (GitHub Copilot - merged single file)
+   - `.clinerules/` directory with individual .md files (Cline)
+   - `.cursor/` directory with individual .mdc files with frontmatter (Cursor)
 
 ### Key Constants
 - `RULE_PREFIXES`: `['copilot', 'cline', 'cursor']`
@@ -34,17 +34,29 @@ AI Rule Forge is a CLI tool for managing rules and configuration files for vario
 - `DEFAULT_RULES_DIR`: `'_rules'`
 
 ### Content Filtering Logic
-The `filterContentByPrefix()` function processes Markdown content:
+The `filterContentByPrefix()` function in `src/cli.ts:112` processes Markdown content:
 - Sections with `[toolname]` are included only for that tool
 - Sections without brackets are included for all tools
 - Maintains proper Markdown structure
+- Cursor files get converted to MDC format with frontmatter via `convertToMDC()`
 
 ## Project Structure
 
-- `src/cli.ts` - Complete CLI implementation
+- `src/cli.ts` - Complete CLI implementation (393 lines, all logic)
 - `src/templates/_rules/` - Default rule templates for initialization
 - `ai-docs/_rules/` - User's rule files (created by init)
 - `ai-docs/ignore` - Ignore patterns (copied to `.toolignore` files)
+- `dist/` - Compiled TypeScript output
+- `package.json` - Defines CLI binary as `ai-rule-forge`
+
+## Legacy File Handling
+
+The tool checks for and prevents conflicts with legacy file formats:
+- `.clinerules` (file) vs `.clinerules/` (directory)
+- `.cursorrules` (file) vs `.cursor/` (directory) 
+- `.cursorignore` (file) vs `.cursor/ignore` (file)
+
+Error handling in `src/cli.ts:225` prevents overwriting if legacy files exist.
 
 ## Security Requirements
 
