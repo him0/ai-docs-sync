@@ -157,7 +157,7 @@ const generateRuleFiles = (inputRootDir: string, outputRootDir: string, preview:
   const OUTPUT_PATHS = {
     copilot: join(outputRootDir, '.github', 'copilot-instructions.md'),
     cline: join(outputRootDir, '.clinerules'),
-    cursor: join(outputRootDir, '.cursor')
+    cursor: join(outputRootDir, '.cursor', 'rules')
   };
 
   // Check if rules directory exists

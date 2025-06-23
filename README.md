@@ -37,7 +37,7 @@ npx https://github.com/him0/ai-rule-forge compile
 This command reads rule files from the `ai-docs/_rules/` directory and generates:
 - `.github/copilot-instructions.md` (for GitHub Copilot)
 - `.clinerules/` directory with individual rule files (for Cline)
-- `.cursor/` directory with MDC format files (for Cursor)
+- `.cursor/rules/` directory with MDC format files (for Cursor)
 
 It also reads the `ai-docs/ignore` file and generates:
 - `.copilotignore` (for GitHub Copilot)
