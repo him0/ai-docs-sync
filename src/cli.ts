@@ -221,22 +221,27 @@ const generateRuleFiles = (inputRootDir: string, outputRootDir: string, preview:
     // Create output directories
     mkdirSync(dirname(OUTPUT_PATHS.copilot), { recursive: true });
 
-    // Special handling for .clinerules directory
-    try {
-      mkdirSync(OUTPUT_PATHS.cline, { recursive: true });
-    } catch (error: any) {
-      if (error.code === 'EEXIST' && existsSync(OUTPUT_PATHS.cline)) {
-        // Check if .clinerules exists as a file instead of directory
-        const stats = statSync(OUTPUT_PATHS.cline);
+    // Check for legacy files that need to be removed
+    const legacyFiles = [
+      { path: OUTPUT_PATHS.cline, name: '.clinerules' },
+      { path: join(outputRootDir, '.cursorrules'), name: '.cursorrules' },
+      { path: join(outputRootDir, '.cursorignore'), name: '.cursorignore' }
+    ];
+
+    for (const { path, name } of legacyFiles) {
+      if (existsSync(path)) {
+        const stats = statSync(path);
         if (stats.isFile()) {
-          console.error(`❌ Error: .clinerules exists as a file but needs to be a directory.`);
-          console.error(`   Please remove the existing .clinerules file and try again.`);
-          console.error(`   You can run: rm .clinerules`);
+          console.error(`❌ Error: ${name} exists as a file but the new format uses directories.`);
+          console.error(`   Please remove the existing ${name} file and try again.`);
+          console.error(`   You can run: rm ${name}`);
           process.exit(1);
         }
       }
-      throw error;
     }
+
+    // Create output directories
+    mkdirSync(OUTPUT_PATHS.cline, { recursive: true });
 
     mkdirSync(OUTPUT_PATHS.cursor, { recursive: true });
 
