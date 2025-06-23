@@ -127,7 +127,7 @@ const convertToMDC = (content, filename) => {
     const baseName = filename.replace('.md', '');
     const frontMatter = `---
 description: ${baseName}
-globs: 
+globs:
 alwaysApply: false
 ---
 
