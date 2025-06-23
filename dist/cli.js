@@ -122,6 +122,18 @@ const filterContentByPrefix = (content, prefix) => {
     }
     return result.join('\n');
 };
+// Convert markdown content to MDC format for cursor
+const convertToMDC = (content, filename) => {
+    const baseName = filename.replace('.md', '');
+    const frontMatter = `---
+description: ${baseName}
+globs: 
+alwaysApply: false
+---
+
+`;
+    return frontMatter + content;
+};
 // Generate rule files
 const generateRuleFiles = (inputRootDir, outputRootDir, preview = false) => {
     // Define paths
@@ -129,7 +141,7 @@ const generateRuleFiles = (inputRootDir, outputRootDir, preview = false) => {
     const OUTPUT_PATHS = {
         copilot: (0, path_1.join)(outputRootDir, '.github', 'copilot-instructions.md'),
         cline: (0, path_1.join)(outputRootDir, '.clinerules'),
-        cursor: (0, path_1.join)(outputRootDir, '.cursorrules')
+        cursor: (0, path_1.join)(outputRootDir, '.cursor')
     };
     // Check if rules directory exists
     if (!(0, fs_1.existsSync)(RULES_DIR)) {
@@ -143,34 +155,71 @@ const generateRuleFiles = (inputRootDir, outputRootDir, preview = false) => {
     if (ruleFiles.length === 0) {
         console.warn(`⚠️ No rule files found in ${RULES_DIR}`);
     }
-    // Generate content for each prefix
-    const contents = RULE_PREFIXES.map(prefix => {
-        const filteredContent = ruleFiles
-            .map(file => {
-            const content = (0, fs_1.readFileSync)((0, path_1.join)(RULES_DIR, file), 'utf-8');
-            return filterContentByPrefix(content, prefix);
-        })
-            .filter(content => content.trim() !== '')
-            .join('\n\n');
-        return { prefix, content: filteredContent };
-    });
     if (preview) {
         // Preview mode: just display the content
-        contents.forEach(({ prefix, content }) => {
+        RULE_PREFIXES.forEach(prefix => {
             console.log(`\n=== ${prefix.toUpperCase()} PREVIEW ===\n`);
-            console.log(content);
+            if (prefix === 'cursor') {
+                // Show individual MDC files for cursor
+                ruleFiles.forEach(file => {
+                    const content = (0, fs_1.readFileSync)((0, path_1.join)(RULES_DIR, file), 'utf-8');
+                    const filteredContent = filterContentByPrefix(content, prefix);
+                    if (filteredContent.trim() !== '') {
+                        console.log(`--- ${file.replace('.md', '.mdc')} ---`);
+                        console.log(convertToMDC(filteredContent, file));
+                        console.log('');
+                    }
+                });
+            }
+            else {
+                // Show merged content for other tools
+                const filteredContent = ruleFiles
+                    .map(file => {
+                    const content = (0, fs_1.readFileSync)((0, path_1.join)(RULES_DIR, file), 'utf-8');
+                    return filterContentByPrefix(content, prefix);
+                })
+                    .filter(content => content.trim() !== '')
+                    .join('\n\n');
+                console.log(filteredContent);
+            }
             console.log('\n=== END PREVIEW ===\n');
         });
     }
     else {
         // Actual file generation
         // Create output directories
-        Object.values(OUTPUT_PATHS).forEach(path => {
-            (0, fs_1.mkdirSync)((0, path_1.dirname)(path), { recursive: true });
-        });
-        // Write files
-        contents.forEach(({ prefix, content }) => {
-            (0, fs_1.writeFileSync)(OUTPUT_PATHS[prefix], content + '\n');
+        (0, fs_1.mkdirSync)((0, path_1.dirname)(OUTPUT_PATHS.copilot), { recursive: true });
+        (0, fs_1.mkdirSync)((0, path_1.dirname)(OUTPUT_PATHS.cline), { recursive: true });
+        (0, fs_1.mkdirSync)(OUTPUT_PATHS.cursor, { recursive: true });
+        // Generate files for each prefix
+        RULE_PREFIXES.forEach(prefix => {
+            if (prefix === 'cursor') {
+                // Generate individual MDC files for cursor
+                ruleFiles.forEach(file => {
+                    const content = (0, fs_1.readFileSync)((0, path_1.join)(RULES_DIR, file), 'utf-8');
+                    const filteredContent = filterContentByPrefix(content, prefix);
+                    if (filteredContent.trim() !== '') {
+                        const mdcFilename = file.replace('.md', '.mdc');
+                        const mdcPath = (0, path_1.join)(OUTPUT_PATHS.cursor, mdcFilename);
+                        const mdcContent = convertToMDC(filteredContent, file);
+                        (0, fs_1.writeFileSync)(mdcPath, mdcContent);
+                        console.log(`📄 Generated: ${mdcPath}`);
+                    }
+                });
+            }
+            else {
+                // Generate merged files for other tools
+                const filteredContent = ruleFiles
+                    .map(file => {
+                    const content = (0, fs_1.readFileSync)((0, path_1.join)(RULES_DIR, file), 'utf-8');
+                    return filterContentByPrefix(content, prefix);
+                })
+                    .filter(content => content.trim() !== '')
+                    .join('\n\n');
+                const outputPath = OUTPUT_PATHS[prefix];
+                (0, fs_1.writeFileSync)(outputPath, filteredContent + '\n');
+                console.log(`📄 Generated: ${outputPath}`);
+            }
         });
         console.log('✨ Generated files successfully!');
     }
@@ -200,7 +249,17 @@ const compileRules = () => {
             const ignoreContent = (0, fs_1.readFileSync)(ignoreFilePath, 'utf-8');
             // Create ignore files for each prefix
             RULE_PREFIXES.forEach(prefix => {
-                const outputPath = (0, path_1.join)(currentDir, `.${prefix}ignore`);
+                let outputPath;
+                if (prefix === 'cursor') {
+                    outputPath = (0, path_1.join)(currentDir, '.cursor', 'ignore');
+                }
+                else {
+                    outputPath = (0, path_1.join)(currentDir, `.${prefix}ignore`);
+                }
+                // Ensure directory exists for cursor ignore
+                if (prefix === 'cursor') {
+                    (0, fs_1.mkdirSync)((0, path_1.dirname)(outputPath), { recursive: true });
+                }
                 (0, fs_1.writeFileSync)(outputPath, ignoreContent);
                 console.log(`📄 Generated: ${outputPath}`);
             });
