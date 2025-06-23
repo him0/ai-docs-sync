@@ -1,9 +1,3 @@
----
-description: 01_security
-globs:
-alwaysApply: false
----
-
 # Security
 ## Sensitive Files
 DO NOT read or modify:

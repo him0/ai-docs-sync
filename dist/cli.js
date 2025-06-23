@@ -189,7 +189,7 @@ const generateRuleFiles = (inputRootDir, outputRootDir, preview = false) => {
         // Actual file generation
         // Create output directories
         (0, fs_1.mkdirSync)((0, path_1.dirname)(OUTPUT_PATHS.copilot), { recursive: true });
-        (0, fs_1.mkdirSync)((0, path_1.dirname)(OUTPUT_PATHS.cline), { recursive: true });
+        (0, fs_1.mkdirSync)(OUTPUT_PATHS.cline, { recursive: true });
         (0, fs_1.mkdirSync)(OUTPUT_PATHS.cursor, { recursive: true });
         // Generate files for each prefix
         RULE_PREFIXES.forEach(prefix => {
@@ -217,8 +217,16 @@ const generateRuleFiles = (inputRootDir, outputRootDir, preview = false) => {
                     .filter(content => content.trim() !== '')
                     .join('\n\n');
                 const outputPath = OUTPUT_PATHS[prefix];
-                (0, fs_1.writeFileSync)(outputPath, filteredContent + '\n');
-                console.log(`📄 Generated: ${outputPath}`);
+                if (prefix === 'cline') {
+                    // For cline, write to a file inside the .clinerules directory
+                    const clineFilePath = (0, path_1.join)(outputPath, 'rules');
+                    (0, fs_1.writeFileSync)(clineFilePath, filteredContent + '\n');
+                    console.log(`📄 Generated: ${clineFilePath}`);
+                }
+                else {
+                    (0, fs_1.writeFileSync)(outputPath, filteredContent + '\n');
+                    console.log(`📄 Generated: ${outputPath}`);
+                }
             }
         });
         console.log('✨ Generated files successfully!');
@@ -253,11 +261,14 @@ const compileRules = () => {
                 if (prefix === 'cursor') {
                     outputPath = (0, path_1.join)(currentDir, '.cursor', 'ignore');
                 }
+                else if (prefix === 'cline') {
+                    outputPath = (0, path_1.join)(currentDir, '.clinerules', 'ignore');
+                }
                 else {
                     outputPath = (0, path_1.join)(currentDir, `.${prefix}ignore`);
                 }
-                // Ensure directory exists for cursor ignore
-                if (prefix === 'cursor') {
+                // Ensure directory exists for cursor and cline ignore
+                if (prefix === 'cursor' || prefix === 'cline') {
                     (0, fs_1.mkdirSync)((0, path_1.dirname)(outputPath), { recursive: true });
                 }
                 (0, fs_1.writeFileSync)(outputPath, ignoreContent);

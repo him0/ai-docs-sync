@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, copyFileSync, writeFileSync, readFileSync, readdirSync } from 'fs';
+import { existsSync, mkdirSync, copyFileSync, writeFileSync, readFileSync, readdirSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 
 // Constants for rule compilation
@@ -142,7 +142,7 @@ const convertToMDC = (content: string, filename: string): string => {
   const baseName = filename.replace('.md', '');
   const frontMatter = `---
 description: ${baseName}
-globs: 
+globs:
 alwaysApply: false
 ---
 
@@ -179,7 +179,7 @@ const generateRuleFiles = (inputRootDir: string, outputRootDir: string, preview:
     // Preview mode: just display the content
     RULE_PREFIXES.forEach(prefix => {
       console.log(`\n=== ${prefix.toUpperCase()} PREVIEW ===\n`);
-      
+
       if (prefix === 'cursor') {
         // Show individual MDC files for cursor
         ruleFiles.forEach(file => {
@@ -188,6 +188,17 @@ const generateRuleFiles = (inputRootDir: string, outputRootDir: string, preview:
           if (filteredContent.trim() !== '') {
             console.log(`--- ${file.replace('.md', '.mdc')} ---`);
             console.log(convertToMDC(filteredContent, file));
+            console.log('');
+          }
+        });
+      } else if (prefix === 'cline') {
+        // Show individual files for cline
+        ruleFiles.forEach(file => {
+          const content = readFileSync(join(RULES_DIR, file), 'utf-8');
+          const filteredContent = filterContentByPrefix(content, prefix);
+          if (filteredContent.trim() !== '') {
+            console.log(`--- ${file} ---`);
+            console.log(filteredContent);
             console.log('');
           }
         });
@@ -202,14 +213,31 @@ const generateRuleFiles = (inputRootDir: string, outputRootDir: string, preview:
           .join('\n\n');
         console.log(filteredContent);
       }
-      
+
       console.log('\n=== END PREVIEW ===\n');
     });
   } else {
     // Actual file generation
     // Create output directories
     mkdirSync(dirname(OUTPUT_PATHS.copilot), { recursive: true });
-    mkdirSync(dirname(OUTPUT_PATHS.cline), { recursive: true });
+
+    // Special handling for .clinerules directory
+    try {
+      mkdirSync(OUTPUT_PATHS.cline, { recursive: true });
+    } catch (error: any) {
+      if (error.code === 'EEXIST' && existsSync(OUTPUT_PATHS.cline)) {
+        // Check if .clinerules exists as a file instead of directory
+        const stats = statSync(OUTPUT_PATHS.cline);
+        if (stats.isFile()) {
+          console.error(`❌ Error: .clinerules exists as a file but needs to be a directory.`);
+          console.error(`   Please remove the existing .clinerules file and try again.`);
+          console.error(`   You can run: rm .clinerules`);
+          process.exit(1);
+        }
+      }
+      throw error;
+    }
+
     mkdirSync(OUTPUT_PATHS.cursor, { recursive: true });
 
     // Generate files for each prefix
@@ -227,6 +255,17 @@ const generateRuleFiles = (inputRootDir: string, outputRootDir: string, preview:
             console.log(`📄 Generated: ${mdcPath}`);
           }
         });
+      } else if (prefix === 'cline') {
+        // Generate individual files for cline
+        ruleFiles.forEach(file => {
+          const content = readFileSync(join(RULES_DIR, file), 'utf-8');
+          const filteredContent = filterContentByPrefix(content, prefix);
+          if (filteredContent.trim() !== '') {
+            const clineFilePath = join(OUTPUT_PATHS.cline, file);
+            writeFileSync(clineFilePath, filteredContent + '\n');
+            console.log(`📄 Generated: ${clineFilePath}`);
+          }
+        });
       } else {
         // Generate merged files for other tools
         const filteredContent = ruleFiles
@@ -236,7 +275,7 @@ const generateRuleFiles = (inputRootDir: string, outputRootDir: string, preview:
           })
           .filter(content => content.trim() !== '')
           .join('\n\n');
-        
+
         const outputPath = OUTPUT_PATHS[prefix as keyof typeof OUTPUT_PATHS] as string;
         writeFileSync(outputPath, filteredContent + '\n');
         console.log(`📄 Generated: ${outputPath}`);
@@ -280,15 +319,17 @@ const compileRules = () => {
         let outputPath: string;
         if (prefix === 'cursor') {
           outputPath = join(currentDir, '.cursor', 'ignore');
+        } else if (prefix === 'cline') {
+          outputPath = join(currentDir, '.clineignore');
         } else {
           outputPath = join(currentDir, `.${prefix}ignore`);
         }
-        
+
         // Ensure directory exists for cursor ignore
         if (prefix === 'cursor') {
           mkdirSync(dirname(outputPath), { recursive: true });
         }
-        
+
         writeFileSync(outputPath, ignoreContent);
         console.log(`📄 Generated: ${outputPath}`);
       });
