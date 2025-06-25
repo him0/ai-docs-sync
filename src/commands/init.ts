@@ -14,7 +14,7 @@ export const initProject = (): void => {
   const ignoreFilePath = join(aiDocsDir, 'ignore');
   createFileWithContent(ignoreFilePath, '# Ignore patterns for AI assistants\n');
 
-  const templatesDir = join(__dirname, '..', '..', 'src', 'templates');
+  const templatesDir = join(__dirname, '..', 'templates');
   const templateRulesDir = join(templatesDir, DEFAULT_RULES_DIR);
 
   if (require('fs').existsSync(templateRulesDir)) {

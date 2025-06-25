@@ -1,21 +1,41 @@
 {
   "name": "ai-rule-forge",
   "version": "0.2.0",
+  "type": "module",
   "description": "AI Document Management. Manage rules for GitHub Copilot, Cline, Cursor, and other AI tools.",
+  "author": "him0",
+  "license": "MIT",
+  "keywords": ["ai", "copilot", "cline", "cursor", "rules", "cli"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/him0/ai-rule-forge.git"
+  },
   "bin": {
     "ai-rule-forge": "./dist/cli.js"
   },
   "files": [
-    "dist",
-    "src/templates"
+    "dist"
   ],
+  "main": "./dist/cli.js",
+  "module": "./dist/cli.js",
+  "types": "./dist/cli.d.ts",
+  "engines": {
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0"
+  },
   "scripts": {
-    "build": "tsc && chmod +x ./dist/cli.js",
-    "init": "tsx src/cli.ts init",
-    "compile": "tsx src/cli.ts compile",
-    "preview": "tsx src/cli.ts preview"
+    "dev": "bun run src/cli.ts",
+    "build": "bun build src/cli.ts --target=node --outfile=dist/cli.js && bun run build:types && cp -r src/templates dist/ && chmod +x ./dist/cli.js",
+    "build:types": "tsc --emitDeclarationOnly",
+    "init": "bun run src/cli.ts init",
+    "compile": "bun run src/cli.ts compile",
+    "preview": "bun run src/cli.ts preview",
+    "prepublishOnly": "bun run build",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@types/bun": "^1.2.17",
     "@types/node": "^22.13.10",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2"

@@ -2,17 +2,43 @@
 
 AI Document Management. Manage rules and knowledge for GitHub Copilot, Cline, Cursor, and other AI tools.
 
+**Fast CLI built with Bun, compatible with Node.js and available via npx.**
+
 ## Overview
 
-ai-rule-forge is a tool for managing rules and knowledge for AI tools (GitHub Copilot, Cline, Cursor, etc.).
+ai-rule-forge is a fast CLI tool built with Bun for managing rules and knowledge for AI tools (GitHub Copilot, Cline, Cursor, etc.).
 It allows you to generate configuration files for various AI tools from a single source.
+
+## Installation
+
+### Quick Start (Recommended)
+
+```bash
+npx ai-rule-forge init
+```
+
+### Development with Bun
+
+```bash
+# Clone and install
+bun install
+
+# Development commands
+bun run dev init          # Initialize project
+bun run dev compile       # Compile rules
+bun run dev preview       # Preview rules
+
+# Build for distribution
+bun run build
+```
 
 ## Usage
 
 ### Initialize a New Project
 
 ```bash
-npx https://github.com/him0/ai-rule-forge init
+npx ai-rule-forge init
+```
 
 This command will:
 - Create the `ai-docs/` directory
@@ -20,7 +46,6 @@ This command will:
 - Create basic rule files
 - Create necessary configuration files
 - Create the `ai-docs/ignore` file for defining ignore patterns
-```
 
 
 ### Edit Rules
@@ -31,7 +56,7 @@ You can use numeric prefixes (e.g., `01_security.md`) to control the order.
 ### Apply Rules
 
 ```bash
-npx https://github.com/him0/ai-rule-forge compile
+npx ai-rule-forge compile
 ```
 
 This command reads rule files from the `ai-docs/_rules/` directory and generates:
@@ -47,7 +72,7 @@ It also reads the `ai-docs/ignore` file and generates:
 ### Preview
 
 ```bash
-npx https://github.com/him0/ai-rule-forge preview
+npx ai-rule-forge preview
 ```
 
 This command previews the content of the files that will be generated.
