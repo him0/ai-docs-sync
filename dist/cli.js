@@ -141,7 +141,7 @@ const generateRuleFiles = (inputRootDir, outputRootDir, preview = false) => {
     const OUTPUT_PATHS = {
         copilot: (0, path_1.join)(outputRootDir, '.github', 'copilot-instructions.md'),
         cline: (0, path_1.join)(outputRootDir, '.clinerules'),
-        cursor: (0, path_1.join)(outputRootDir, '.cursor')
+        cursor: (0, path_1.join)(outputRootDir, '.cursor', 'rules')
     };
     // Check if rules directory exists
     if (!(0, fs_1.existsSync)(RULES_DIR)) {
@@ -171,6 +171,18 @@ const generateRuleFiles = (inputRootDir, outputRootDir, preview = false) => {
                     }
                 });
             }
+            else if (prefix === 'cline') {
+                // Show individual files for cline
+                ruleFiles.forEach(file => {
+                    const content = (0, fs_1.readFileSync)((0, path_1.join)(RULES_DIR, file), 'utf-8');
+                    const filteredContent = filterContentByPrefix(content, prefix);
+                    if (filteredContent.trim() !== '') {
+                        console.log(`--- ${file} ---`);
+                        console.log(filteredContent);
+                        console.log('');
+                    }
+                });
+            }
             else {
                 // Show merged content for other tools
                 const filteredContent = ruleFiles
@@ -189,6 +201,24 @@ const generateRuleFiles = (inputRootDir, outputRootDir, preview = false) => {
         // Actual file generation
         // Create output directories
         (0, fs_1.mkdirSync)((0, path_1.dirname)(OUTPUT_PATHS.copilot), { recursive: true });
+        // Check for legacy files that need to be removed
+        const legacyFiles = [
+            { path: OUTPUT_PATHS.cline, name: '.clinerules' },
+            { path: (0, path_1.join)(outputRootDir, '.cursorrules'), name: '.cursorrules' },
+            { path: (0, path_1.join)(outputRootDir, '.cursorignore'), name: '.cursorignore' }
+        ];
+        for (const { path, name } of legacyFiles) {
+            if ((0, fs_1.existsSync)(path)) {
+                const stats = (0, fs_1.statSync)(path);
+                if (stats.isFile()) {
+                    console.error(`❌ Error: ${name} exists as a file but the new format uses directories.`);
+                    console.error(`   Please remove the existing ${name} file and try again.`);
+                    console.error(`   You can run: rm ${name}`);
+                    process.exit(1);
+                }
+            }
+        }
+        // Create output directories
         (0, fs_1.mkdirSync)(OUTPUT_PATHS.cline, { recursive: true });
         (0, fs_1.mkdirSync)(OUTPUT_PATHS.cursor, { recursive: true });
         // Generate files for each prefix
@@ -207,6 +237,18 @@ const generateRuleFiles = (inputRootDir, outputRootDir, preview = false) => {
                     }
                 });
             }
+            else if (prefix === 'cline') {
+                // Generate individual files for cline
+                ruleFiles.forEach(file => {
+                    const content = (0, fs_1.readFileSync)((0, path_1.join)(RULES_DIR, file), 'utf-8');
+                    const filteredContent = filterContentByPrefix(content, prefix);
+                    if (filteredContent.trim() !== '') {
+                        const clineFilePath = (0, path_1.join)(OUTPUT_PATHS.cline, file);
+                        (0, fs_1.writeFileSync)(clineFilePath, filteredContent + '\n');
+                        console.log(`📄 Generated: ${clineFilePath}`);
+                    }
+                });
+            }
             else {
                 // Generate merged files for other tools
                 const filteredContent = ruleFiles
@@ -217,16 +259,8 @@ const generateRuleFiles = (inputRootDir, outputRootDir, preview = false) => {
                     .filter(content => content.trim() !== '')
                     .join('\n\n');
                 const outputPath = OUTPUT_PATHS[prefix];
-                if (prefix === 'cline') {
-                    // For cline, write to a file inside the .clinerules directory
-                    const clineFilePath = (0, path_1.join)(outputPath, 'rules');
-                    (0, fs_1.writeFileSync)(clineFilePath, filteredContent + '\n');
-                    console.log(`📄 Generated: ${clineFilePath}`);
-                }
-                else {
-                    (0, fs_1.writeFileSync)(outputPath, filteredContent + '\n');
-                    console.log(`📄 Generated: ${outputPath}`);
-                }
+                (0, fs_1.writeFileSync)(outputPath, filteredContent + '\n');
+                console.log(`📄 Generated: ${outputPath}`);
             }
         });
         console.log('✨ Generated files successfully!');
@@ -262,13 +296,13 @@ const compileRules = () => {
                     outputPath = (0, path_1.join)(currentDir, '.cursor', 'ignore');
                 }
                 else if (prefix === 'cline') {
-                    outputPath = (0, path_1.join)(currentDir, '.clinerules', 'ignore');
+                    outputPath = (0, path_1.join)(currentDir, '.clineignore');
                 }
                 else {
                     outputPath = (0, path_1.join)(currentDir, `.${prefix}ignore`);
                 }
-                // Ensure directory exists for cursor and cline ignore
-                if (prefix === 'cursor' || prefix === 'cline') {
+                // Ensure directory exists for cursor ignore
+                if (prefix === 'cursor') {
                     (0, fs_1.mkdirSync)((0, path_1.dirname)(outputPath), { recursive: true });
                 }
                 (0, fs_1.writeFileSync)(outputPath, ignoreContent);
