@@ -1,4 +1,5 @@
-import type { OutputPaths, RulePrefix, LegacyFile } from '../constants';
+import type { OutputPaths, RulePrefix } from '../constants';
+import type { LegacyFile } from './generators/types';
 export declare const ensureDir: (dir: string) => void;
 export declare const copyFileIfNotExists: (source: string, target: string) => boolean;
 export declare const copyDirRecursive: (source: string, target: string) => boolean;

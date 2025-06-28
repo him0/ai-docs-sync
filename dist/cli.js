@@ -1,16 +1,54 @@
 #!/usr/bin/env node
 import { createRequire } from "node:module";
+var __defProp = Object.defineProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __moduleCache = /* @__PURE__ */ new WeakMap;
+var __toCommonJS = (from) => {
+  var entry = __moduleCache.get(from), desc;
+  if (entry)
+    return entry;
+  entry = __defProp({}, "__esModule", { value: true });
+  if (from && typeof from === "object" || typeof from === "function")
+    __getOwnPropNames(from).map((key) => !__hasOwnProp.call(entry, key) && __defProp(entry, key, {
+      get: () => from[key],
+      enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
+    }));
+  __moduleCache.set(from, entry);
+  return entry;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, {
+      get: all[name],
+      enumerable: true,
+      configurable: true,
+      set: (newValue) => all[name] = () => newValue
+    });
+};
+var __esm = (fn, res) => () => (fn && (res = fn(fn = 0)), res);
 var __require = /* @__PURE__ */ createRequire(import.meta.url);
 
-// src/commands/init.ts
-import { join as join2 } from "path";
-
 // src/constants.ts
-var RULE_PREFIXES = ["copilot", "cline", "cursor"];
-var DEFAULT_AI_DOCS_DIR = "ai-docs";
-var DEFAULT_RULES_DIR = "_rules";
+var RULE_PREFIXES, DEFAULT_AI_DOCS_DIR = "ai-docs", DEFAULT_RULES_DIR = "rules";
+var init_constants = __esm(() => {
+  RULE_PREFIXES = ["copilot", "cline", "cursor"];
+});
 
 // src/lib/file-utils.ts
+var exports_file_utils = {};
+__export(exports_file_utils, {
+  getRulesDir: () => getRulesDir,
+  getOutputPaths: () => getOutputPaths,
+  getIgnoreFilePath: () => getIgnoreFilePath,
+  getAiDocsDir: () => getAiDocsDir,
+  ensureDir: () => ensureDir,
+  createFileWithContent: () => createFileWithContent,
+  copyFileIfNotExists: () => copyFileIfNotExists,
+  copyDirRecursive: () => copyDirRecursive,
+  checkLegacyFiles: () => checkLegacyFiles
+});
 import { existsSync, mkdirSync, copyFileSync, writeFileSync, readdirSync, statSync } from "fs";
 import { join, dirname } from "path";
 var ensureDir = (dir) => {
@@ -18,8 +56,7 @@ var ensureDir = (dir) => {
     mkdirSync(dir, { recursive: true });
     console.log(`\uD83D\uDCC1 Created directory: ${dir}`);
   }
-};
-var copyFileIfNotExists = (source, target) => {
+}, copyFileIfNotExists = (source, target) => {
   if (!existsSync(target)) {
     ensureDir(dirname(target));
     copyFileSync(source, target);
@@ -28,8 +65,7 @@ var copyFileIfNotExists = (source, target) => {
   }
   console.log(`⚠️ File already exists (skipped): ${target}`);
   return false;
-};
-var copyDirRecursive = (source, target) => {
+}, copyDirRecursive = (source, target) => {
   if (!existsSync(source)) {
     console.error(`❌ Source directory does not exist: ${source}`);
     return false;
@@ -46,14 +82,12 @@ var copyDirRecursive = (source, target) => {
     }
   }
   return true;
-};
-var createFileWithContent = (filePath, content) => {
+}, createFileWithContent = (filePath, content) => {
   if (!existsSync(filePath)) {
     writeFileSync(filePath, content);
     console.log(`\uD83D\uDCC4 Created file: ${filePath}`);
   }
-};
-var checkLegacyFiles = (legacyFiles) => {
+}, checkLegacyFiles = (legacyFiles) => {
   for (const { path, name } of legacyFiles) {
     if (existsSync(path)) {
       const stats = statSync(path);
@@ -65,18 +99,17 @@ var checkLegacyFiles = (legacyFiles) => {
       }
     }
   }
-};
-var getAiDocsDir = (currentDir) => {
+}, getAiDocsDir = (currentDir) => {
   return join(currentDir, DEFAULT_AI_DOCS_DIR);
-};
-var getOutputPaths = (outputRootDir) => {
+}, getRulesDir = (aiDocsDir) => {
+  return join(aiDocsDir, DEFAULT_RULES_DIR);
+}, getOutputPaths = (outputRootDir) => {
   return {
     copilot: join(outputRootDir, ".github", "copilot-instructions.md"),
     cline: join(outputRootDir, ".clinerules"),
     cursor: join(outputRootDir, ".cursor", "rules")
   };
-};
-var getIgnoreFilePath = (outputRootDir, prefix) => {
+}, getIgnoreFilePath = (outputRootDir, prefix) => {
   switch (prefix) {
     case "cursor":
       return join(outputRootDir, ".cursor", "ignore");
@@ -86,8 +119,14 @@ var getIgnoreFilePath = (outputRootDir, prefix) => {
       return join(outputRootDir, `.${prefix}ignore`);
   }
 };
+var init_file_utils = __esm(() => {
+  init_constants();
+});
 
 // src/commands/init.ts
+init_constants();
+init_file_utils();
+import { join as join2 } from "path";
 var __dirname = "/Users/him0/src/ai-rule-forge/src/commands";
 var initProject = () => {
   const currentDir = process.cwd();
@@ -95,58 +134,83 @@ var initProject = () => {
   const rulesDir = join2(aiDocsDir, DEFAULT_RULES_DIR);
   ensureDir(aiDocsDir);
   ensureDir(rulesDir);
-  const ignoreFilePath = join2(aiDocsDir, "ignore");
-  createFileWithContent(ignoreFilePath, `# Ignore patterns for AI assistants
-`);
   const templatesDir = join2(__dirname, "..", "templates");
   const templateRulesDir = join2(templatesDir, DEFAULT_RULES_DIR);
+  const templateIgnoreFile = join2(templatesDir, "ignore");
+  const targetIgnoreFile = join2(aiDocsDir, "ignore");
   if (__require("fs").existsSync(templateRulesDir)) {
     console.log("\uD83D\uDCC2 Copying rules templates...");
     copyDirRecursive(templateRulesDir, rulesDir);
   } else {
     console.warn("⚠️ Template rules directory not found:", templateRulesDir);
   }
+  if (__require("fs").existsSync(templateIgnoreFile)) {
+    copyFileIfNotExists(templateIgnoreFile, targetIgnoreFile);
+  } else {
+    console.warn("⚠️ Template ignore file not found, creating default");
+    const { createFileWithContent: createFileWithContent2 } = (init_file_utils(), __toCommonJS(exports_file_utils));
+    createFileWithContent2(targetIgnoreFile, `# Ignore patterns for AI assistants
+`);
+  }
   console.log(`✅ ${DEFAULT_AI_DOCS_DIR} project initialization complete!`);
   console.log("Next steps:");
   console.log(`1. Edit rules: modify files in the ${DEFAULT_AI_DOCS_DIR}/${DEFAULT_RULES_DIR}/ directory`);
   console.log(`2. Edit ignore patterns: modify the ${DEFAULT_AI_DOCS_DIR}/ignore file`);
-  console.log("3. Compile: npx ai-docs compile");
-  console.log("4. Preview: npx ai-docs preview");
+  console.log("3. Compile: npx ai-docs-cli compile");
+  console.log("4. Preview: npx ai-docs-cli preview");
 };
 
 // src/commands/compile.ts
-import { existsSync as existsSync3, readFileSync as readFileSync2, writeFileSync as writeFileSync3, mkdirSync as mkdirSync3 } from "fs";
-import { join as join4, dirname as dirname3 } from "path";
+init_constants();
+init_file_utils();
+import { existsSync as existsSync3 } from "fs";
 
-// src/lib/rule-generator.ts
-import { existsSync as existsSync2, readFileSync, readdirSync as readdirSync2, writeFileSync as writeFileSync2, mkdirSync as mkdirSync2 } from "fs";
-import { join as join3, dirname as dirname2 } from "path";
-var filterContentByPrefix = (content, prefix) => {
-  const lines = content.split(`
+// src/lib/compiler.ts
+init_constants();
+init_file_utils();
+import { existsSync as existsSync2, readdirSync as readdirSync2, mkdirSync as mkdirSync2, readFileSync, writeFileSync as writeFileSync2 } from "fs";
+import { join as join6, dirname as dirname2 } from "path";
+
+// src/lib/generators/copilot-generator.ts
+import { join as join3 } from "path";
+var generate = (ruleFiles, outputRootDir) => {
+  const outputPath = getOutputPath(outputRootDir);
+  const mergedContent = ruleFiles.map((file) => file.content).filter((content) => content.trim() !== "").join(`
+
 `);
-  const result = [];
-  let includeSection = true;
-  let inSection = false;
-  for (const line of lines) {
-    if (line.startsWith("#")) {
-      inSection = false;
-      if (line.includes(`[${prefix}]`)) {
-        includeSection = true;
-        inSection = true;
-        result.push(line.replace(`[${prefix}]`, "").trim());
-      } else if (line.includes("[")) {
-        includeSection = false;
-      } else {
-        includeSection = !inSection;
-        result.push(line);
-      }
-    } else if (includeSection && line.trim() !== "") {
-      result.push(line);
-    }
-  }
-  return result.join(`
-`);
+  const finalContent = mergedContent + `
+`;
+  return [{
+    path: outputPath,
+    content: finalContent
+  }];
 };
+var getOutputPath = (outputRootDir) => {
+  return join3(outputRootDir, ".github", "copilot-instructions.md");
+};
+var getIgnorePath = (outputRootDir) => {
+  return join3(outputRootDir, ".copilotignore");
+};
+var generateIgnore = (ignoreContent, outputRootDir) => {
+  const ignorePath = getIgnorePath(outputRootDir);
+  return {
+    path: ignorePath,
+    content: ignoreContent
+  };
+};
+var getLegacyFiles = (outputRootDir) => {
+  return [];
+};
+var copilotGenerator = {
+  generate,
+  generateIgnore,
+  getOutputPath,
+  getIgnorePath,
+  getLegacyFiles
+};
+
+// src/lib/generators/cursor-generator.ts
+import { join as join4 } from "path";
 var convertToMDC = (content, filename) => {
   const baseName = filename.replace(".md", "");
   const frontMatter = `---
@@ -158,136 +222,192 @@ alwaysApply: false
 `;
   return frontMatter + content;
 };
+var generate2 = (ruleFiles, outputRootDir) => {
+  const outputPath = getOutputPath2(outputRootDir);
+  const generatedFiles = [];
+  ruleFiles.forEach((ruleFile) => {
+    if (ruleFile.content.trim() !== "") {
+      const mdcFilename = ruleFile.filename.replace(".md", ".mdc");
+      const mdcPath = join4(outputPath, mdcFilename);
+      const mdcContent = convertToMDC(ruleFile.content, ruleFile.filename);
+      generatedFiles.push({
+        path: mdcPath,
+        content: mdcContent
+      });
+    }
+  });
+  return generatedFiles;
+};
+var getOutputPath2 = (outputRootDir) => {
+  return join4(outputRootDir, ".cursor", "rules");
+};
+var getIgnorePath2 = (outputRootDir) => {
+  return join4(outputRootDir, ".cursor", "ignore");
+};
+var generateIgnore2 = (ignoreContent, outputRootDir) => {
+  const ignorePath = getIgnorePath2(outputRootDir);
+  return {
+    path: ignorePath,
+    content: ignoreContent
+  };
+};
+var getLegacyFiles2 = (outputRootDir) => {
+  return [
+    { path: join4(outputRootDir, ".cursorrules"), name: ".cursorrules" },
+    { path: join4(outputRootDir, ".cursorignore"), name: ".cursorignore" }
+  ];
+};
+var cursorGenerator = {
+  generate: generate2,
+  generateIgnore: generateIgnore2,
+  getOutputPath: getOutputPath2,
+  getIgnorePath: getIgnorePath2,
+  getLegacyFiles: getLegacyFiles2
+};
+
+// src/lib/generators/cline-generator.ts
+import { join as join5 } from "path";
+var generate3 = (ruleFiles, outputRootDir) => {
+  const outputPath = getOutputPath3(outputRootDir);
+  const generatedFiles = [];
+  ruleFiles.forEach((ruleFile) => {
+    if (ruleFile.content.trim() !== "") {
+      const clineFilePath = join5(outputPath, ruleFile.filename);
+      const finalContent = ruleFile.content + `
+`;
+      generatedFiles.push({
+        path: clineFilePath,
+        content: finalContent
+      });
+    }
+  });
+  return generatedFiles;
+};
+var getOutputPath3 = (outputRootDir) => {
+  return join5(outputRootDir, ".clinerules");
+};
+var getIgnorePath3 = (outputRootDir) => {
+  return join5(outputRootDir, ".clineignore");
+};
+var generateIgnore3 = (ignoreContent, outputRootDir) => {
+  const ignorePath = getIgnorePath3(outputRootDir);
+  return {
+    path: ignorePath,
+    content: ignoreContent
+  };
+};
+var getLegacyFiles3 = (outputRootDir) => {
+  const outputPath = getOutputPath3(outputRootDir);
+  return [
+    { path: outputPath, name: ".clinerules" }
+  ];
+};
+var clineGenerator = {
+  generate: generate3,
+  generateIgnore: generateIgnore3,
+  getOutputPath: getOutputPath3,
+  getIgnorePath: getIgnorePath3,
+  getLegacyFiles: getLegacyFiles3
+};
+
+// src/lib/generators/index.ts
+var generators = {
+  copilot: copilotGenerator,
+  cursor: cursorGenerator,
+  cline: clineGenerator
+};
+var getGenerator = (prefix) => {
+  const generator = generators[prefix];
+  if (!generator) {
+    throw new Error(`No generator found for prefix: ${prefix}`);
+  }
+  return generator;
+};
+
+// src/lib/compiler.ts
 var loadRuleFiles = (rulesDir) => {
   if (!existsSync2(rulesDir)) {
     console.error(`❌ Rules directory not found: ${rulesDir}`);
     process.exit(1);
   }
-  const ruleFiles = readdirSync2(rulesDir).filter((file) => file.endsWith(".md")).sort();
-  if (ruleFiles.length === 0) {
+  const filenames = readdirSync2(rulesDir).filter((file) => file.endsWith(".md")).sort();
+  if (filenames.length === 0) {
     console.warn(`⚠️ No rule files found in ${rulesDir}`);
   }
-  return ruleFiles;
+  return filenames.map((filename) => ({
+    filename,
+    content: readFileSync(join6(rulesDir, filename), "utf-8")
+  }));
 };
-var previewRules = (rulesDir, ruleFiles) => {
+var generateOutputFiles = (ruleFiles, outputRootDir, dryRun = false) => {
   RULE_PREFIXES.forEach((prefix) => {
-    console.log(`
-=== ${prefix.toUpperCase()} PREVIEW ===
-`);
-    if (prefix === "cursor") {
-      ruleFiles.forEach((file) => {
-        const content = readFileSync(join3(rulesDir, file), "utf-8");
-        const filteredContent = filterContentByPrefix(content, prefix);
-        if (filteredContent.trim() !== "") {
-          console.log(`--- ${file.replace(".md", ".mdc")} ---`);
-          console.log(convertToMDC(filteredContent, file));
-          console.log("");
-        }
+    const generator = getGenerator(prefix);
+    const generatedFiles = generator.generate(ruleFiles, outputRootDir);
+    if (dryRun) {
+      console.log(`
+=== ${prefix.toUpperCase()} PREVIEW ===`);
+      generatedFiles.forEach((file) => {
+        console.log(`
+--- ${file.path} ---`);
+        console.log(file.content);
       });
-    } else if (prefix === "cline") {
-      ruleFiles.forEach((file) => {
-        const content = readFileSync(join3(rulesDir, file), "utf-8");
-        const filteredContent = filterContentByPrefix(content, prefix);
-        if (filteredContent.trim() !== "") {
-          console.log(`--- ${file} ---`);
-          console.log(filteredContent);
-          console.log("");
-        }
-      });
-    } else {
-      const filteredContent = ruleFiles.map((file) => {
-        const content = readFileSync(join3(rulesDir, file), "utf-8");
-        return filterContentByPrefix(content, prefix);
-      }).filter((content) => content.trim() !== "").join(`
-
-`);
-      console.log(filteredContent);
-    }
-    console.log(`
+      console.log(`
 === END PREVIEW ===
 `);
-  });
-};
-var generateCursorFiles = (rulesDir, ruleFiles, outputPath) => {
-  ruleFiles.forEach((file) => {
-    const content = readFileSync(join3(rulesDir, file), "utf-8");
-    const filteredContent = filterContentByPrefix(content, "cursor");
-    if (filteredContent.trim() !== "") {
-      const mdcFilename = file.replace(".md", ".mdc");
-      const mdcPath = join3(outputPath, mdcFilename);
-      const mdcContent = convertToMDC(filteredContent, file);
-      writeFileSync2(mdcPath, mdcContent);
-      console.log(`\uD83D\uDCC4 Generated: ${mdcPath}`);
+    } else {
+      generatedFiles.forEach((file) => {
+        mkdirSync2(dirname2(file.path), { recursive: true });
+        writeFileSync2(file.path, file.content);
+        console.log(`\uD83D\uDCC4 Generated: ${file.path}`);
+      });
     }
   });
 };
-var generateClineFiles = (rulesDir, ruleFiles, outputPath) => {
-  ruleFiles.forEach((file) => {
-    const content = readFileSync(join3(rulesDir, file), "utf-8");
-    const filteredContent = filterContentByPrefix(content, "cline");
-    if (filteredContent.trim() !== "") {
-      const clineFilePath = join3(outputPath, file);
-      writeFileSync2(clineFilePath, filteredContent + `
+var generateIgnoreFiles = (inputRootDir, outputRootDir, dryRun = false) => {
+  const ignoreFilePath = join6(inputRootDir, "ignore");
+  if (existsSync2(ignoreFilePath)) {
+    const ignoreContent = readFileSync(ignoreFilePath, "utf-8");
+    RULE_PREFIXES.forEach((prefix) => {
+      const generator = getGenerator(prefix);
+      const generatedFile = generator.generateIgnore(ignoreContent, outputRootDir);
+      if (generatedFile) {
+        if (dryRun) {
+          console.log(`
+=== ${prefix.toUpperCase()} IGNORE PREVIEW ===`);
+          console.log(`
+--- ${generatedFile.path} ---`);
+          console.log(generatedFile.content);
+          console.log(`
+=== END PREVIEW ===
 `);
-      console.log(`\uD83D\uDCC4 Generated: ${clineFilePath}`);
-    }
-  });
+        } else {
+          mkdirSync2(dirname2(generatedFile.path), { recursive: true });
+          writeFileSync2(generatedFile.path, generatedFile.content);
+          console.log(`\uD83D\uDCC4 Generated: ${generatedFile.path}`);
+        }
+      }
+    });
+  }
 };
-var generateMergedFile = (rulesDir, ruleFiles, outputPath, prefix) => {
-  const filteredContent = ruleFiles.map((file) => {
-    const content = readFileSync(join3(rulesDir, file), "utf-8");
-    return filterContentByPrefix(content, prefix);
-  }).filter((content) => content.trim() !== "").join(`
-
-`);
-  writeFileSync2(outputPath, filteredContent + `
-`);
-  console.log(`\uD83D\uDCC4 Generated: ${outputPath}`);
-};
-var generateOutputFiles = (rulesDir, ruleFiles, outputPaths) => {
-  mkdirSync2(dirname2(outputPaths.copilot), { recursive: true });
-  mkdirSync2(outputPaths.cline, { recursive: true });
-  mkdirSync2(outputPaths.cursor, { recursive: true });
-  RULE_PREFIXES.forEach((prefix) => {
-    switch (prefix) {
-      case "cursor":
-        generateCursorFiles(rulesDir, ruleFiles, outputPaths.cursor);
-        break;
-      case "cline":
-        generateClineFiles(rulesDir, ruleFiles, outputPaths.cline);
-        break;
-      default:
-        generateMergedFile(rulesDir, ruleFiles, outputPaths[prefix], prefix);
-        break;
-    }
-  });
-};
-var generateRuleFiles = (inputRootDir, outputRootDir, preview = false) => {
-  const rulesDir = join3(inputRootDir, DEFAULT_RULES_DIR);
-  const outputPaths = getOutputPaths(outputRootDir);
+var compileRules = (inputRootDir, outputRootDir, dryRun = false) => {
+  const rulesDir = join6(inputRootDir, DEFAULT_RULES_DIR);
   const ruleFiles = loadRuleFiles(rulesDir);
-  if (preview) {
-    previewRules(rulesDir, ruleFiles);
-  } else {
-    const legacyFiles = [
-      { path: outputPaths.cline, name: ".clinerules" },
-      { path: join3(outputRootDir, ".cursorrules"), name: ".cursorrules" },
-      { path: join3(outputRootDir, ".cursorignore"), name: ".cursorignore" }
-    ];
-    checkLegacyFiles(legacyFiles);
-    generateOutputFiles(rulesDir, ruleFiles, outputPaths);
-    console.log("✨ Generated files successfully!");
+  if (!dryRun) {
+    const allLegacyFiles = [];
+    RULE_PREFIXES.forEach((prefix) => {
+      const generator = getGenerator(prefix);
+      allLegacyFiles.push(...generator.getLegacyFiles(outputRootDir));
+    });
+    checkLegacyFiles(allLegacyFiles);
   }
-  if (outputRootDir !== ".") {
-    console.log(`\uD83D\uDCC1 Using output directory: ${outputRootDir}`);
-  }
-  if (inputRootDir !== `./ai-docs`) {
-    console.log(`\uD83D\uDCC1 Using input directory: ${inputRootDir}`);
-  }
+  generateOutputFiles(ruleFiles, outputRootDir, dryRun);
+};
+var compileIgnore = (inputRootDir, outputRootDir, dryRun = false) => {
+  generateIgnoreFiles(inputRootDir, outputRootDir, dryRun);
 };
 
 // src/commands/compile.ts
-var compileRules = () => {
+var compile = () => {
   const currentDir = process.cwd();
   const aiDocsDir = getAiDocsDir(currentDir);
   if (!existsSync3(aiDocsDir)) {
@@ -296,19 +416,8 @@ var compileRules = () => {
   }
   console.log("\uD83D\uDD04 Compiling rules...");
   try {
-    generateRuleFiles(aiDocsDir, currentDir);
-    const ignoreFilePath = join4(aiDocsDir, "ignore");
-    if (existsSync3(ignoreFilePath)) {
-      const ignoreContent = readFileSync2(ignoreFilePath, "utf-8");
-      RULE_PREFIXES.forEach((prefix) => {
-        const outputPath = getIgnoreFilePath(currentDir, prefix);
-        if (prefix === "cursor") {
-          mkdirSync3(dirname3(outputPath), { recursive: true });
-        }
-        writeFileSync3(outputPath, ignoreContent);
-        console.log(`\uD83D\uDCC4 Generated: ${outputPath}`);
-      });
-    }
+    compileRules(aiDocsDir, currentDir);
+    compileIgnore(aiDocsDir, currentDir);
     console.log("✅ Rules compiled successfully!");
   } catch (error) {
     console.error("❌ Error compiling rules:", error);
@@ -317,8 +426,10 @@ var compileRules = () => {
 };
 
 // src/commands/preview.ts
+init_constants();
+init_file_utils();
 import { existsSync as existsSync4 } from "fs";
-var previewRules2 = () => {
+var previewRules = () => {
   const currentDir = process.cwd();
   const aiDocsDir = getAiDocsDir(currentDir);
   if (!existsSync4(aiDocsDir)) {
@@ -327,7 +438,8 @@ var previewRules2 = () => {
   }
   console.log("\uD83D\uDD0D Previewing rules...");
   try {
-    generateRuleFiles(aiDocsDir, currentDir, true);
+    compileRules(aiDocsDir, currentDir, true);
+    compileIgnore(aiDocsDir, currentDir, true);
     console.log("✅ Rules preview completed!");
   } catch (error) {
     console.error("❌ Error previewing rules:", error);
@@ -336,6 +448,7 @@ var previewRules2 = () => {
 };
 
 // src/commands/help.ts
+init_constants();
 var showHelp = () => {
   console.log(`
 ai-docs-cli
@@ -358,10 +471,10 @@ switch (command) {
     initProject();
     break;
   case "compile":
-    compileRules();
+    compile();
     break;
   case "preview":
-    previewRules2();
+    previewRules();
     break;
   case "help":
   case "--help":

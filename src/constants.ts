@@ -6,11 +6,6 @@ export interface OutputPaths {
   cursor: string;
 }
 
-export interface LegacyFile {
-  path: string;
-  name: string;
-}
-
 export const RULE_PREFIXES: RulePrefix[] = ['copilot', 'cline', 'cursor'];
 export const DEFAULT_AI_DOCS_DIR = 'ai-docs';
-export const DEFAULT_RULES_DIR = '_rules';
+export const DEFAULT_RULES_DIR = 'rules';

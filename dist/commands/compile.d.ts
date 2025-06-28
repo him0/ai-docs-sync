@@ -1,2 +1,2 @@
-export declare const compileRules: () => void;
+export declare const compile: () => void;
 //# sourceMappingURL=compile.d.ts.map

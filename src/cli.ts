@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { initProject } from './commands/init';
-import { compileRules } from './commands/compile';
+import { compile } from './commands/compile';
 import { previewRules } from './commands/preview';
 import { showHelp } from './commands/help';
 
@@ -11,7 +11,7 @@ switch (command) {
     initProject();
     break;
   case 'compile':
-    compileRules();
+    compile();
     break;
   case 'preview':
     previewRules();

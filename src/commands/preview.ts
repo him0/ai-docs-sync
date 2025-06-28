@@ -1,7 +1,7 @@
 import { existsSync } from 'fs';
 import { DEFAULT_AI_DOCS_DIR } from '../constants';
 import { getAiDocsDir } from '../lib/file-utils';
-import { generateRuleFiles } from '../lib/rule-generator';
+import { compileRules, compileIgnore } from '../lib/compiler';
 
 export const previewRules = (): void => {
   const currentDir = process.cwd();
@@ -14,7 +14,8 @@ export const previewRules = (): void => {
 
   console.log('🔍 Previewing rules...');
   try {
-    generateRuleFiles(aiDocsDir, currentDir, true);
+    compileRules(aiDocsDir, currentDir, true);
+    compileIgnore(aiDocsDir, currentDir, true);
     console.log('✅ Rules preview completed!');
   } catch (error) {
     console.error('❌ Error previewing rules:', error);

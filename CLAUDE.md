@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AI Rule Forge is a CLI tool for managing rules and configuration files for various AI tools (GitHub Copilot, Cline, Cursor). It allows defining rules once in Markdown files and compiling them to different output formats.
+AI Docs CLI is a CLI tool for managing rules and configuration files for various AI tools (GitHub Copilot, Cline, Cursor). It allows defining rules once in Markdown files and compiling them to different output formats.
 
 ## Common Commands
 
@@ -18,36 +18,39 @@ AI Rule Forge is a CLI tool for managing rules and configuration files for vario
 ### Core CLI System
 - Main entry point: `src/cli.ts` - Single file containing all CLI logic
 - Commands: `init`, `compile`, `preview`, `help`
-- Template system: `src/templates/_rules/` contains default rule templates
+- Template system: `src/templates/rules/` contains default rule templates
 
 ### Rule Compilation Process
-1. Reads Markdown files from `ai-docs/_rules/` directory (sorted alphabetically)
-2. Filters content based on tool-specific prefixes: `[copilot]`, `[cline]`, `[cursor]`
-3. Generates tool-specific output files:
-   - `.github/copilot-instructions.md` (GitHub Copilot - merged single file)
-   - `.clinerules/` directory with individual .md files (Cline)
-   - `.cursor/` directory with individual .mdc files with frontmatter (Cursor)
+1. Reads Markdown files from `ai-docs/rules/` directory (sorted alphabetically)
+2. Loads all files into RuleFile objects (filename + content)
+3. Passes all rule files to each generator
+4. Each generator processes files according to its own logic:
+   - **Copilot**: Merges all content into single file
+   - **Cline**: Creates individual .md files 
+   - **Cursor**: Converts to .mdc format with frontmatter
 
 ### Key Constants
 - `RULE_PREFIXES`: `['copilot', 'cline', 'cursor']`
 - `DEFAULT_AI_DOCS_DIR`: `'ai-docs'`
-- `DEFAULT_RULES_DIR`: `'_rules'`
+- `DEFAULT_RULES_DIR`: `'rules'`
 
-### Content Filtering Logic
-The `filterContentByPrefix()` function in `src/cli.ts:112` processes Markdown content:
-- Sections with `[toolname]` are included only for that tool
-- Sections without brackets are included for all tools
-- Maintains proper Markdown structure
-- Cursor files get converted to MDC format with frontmatter via `convertToMDC()`
+### Generator Architecture
+- Each AI tool has its own generator module implementing the `Generator` interface
+- Generators are pure functions that return file paths and content
+- No prefix-based filtering - each generator decides how to process rules
+- Modular design allows easy addition of new AI tools
 
 ## Project Structure
 
-- `src/cli.ts` - Complete CLI implementation (393 lines, all logic)
-- `src/templates/_rules/` - Default rule templates for initialization
-- `ai-docs/_rules/` - User's rule files (created by init)
-- `ai-docs/ignore` - Ignore patterns (copied to `.toolignore` files)
+- `src/cli.ts` - Main CLI entry point
+- `src/commands/` - Individual command implementations (init, compile, preview, help)
+- `src/lib/compiler.ts` - Core compilation orchestration
+- `src/lib/generators/` - Modular generator system for each AI tool
+- `src/templates/rules/` - Default rule templates for initialization
+- `ai-docs/rules/` - User's rule files (created by init)
+- `ai-docs/ignore` - Ignore patterns (copied to tool-specific ignore files)
 - `dist/` - Compiled TypeScript output
-- `package.json` - Defines CLI binary as `ai-rule-forge`
+- `package.json` - Defines CLI binary as `ai-docs`
 
 ## Legacy File Handling
 
@@ -56,7 +59,7 @@ The tool checks for and prevents conflicts with legacy file formats:
 - `.cursorrules` (file) vs `.cursor/` (directory) 
 - `.cursorignore` (file) vs `.cursor/ignore` (file)
 
-Error handling in `src/cli.ts:225` prevents overwriting if legacy files exist.
+Each generator defines its own legacy files via the `getLegacyFiles()` method, and the compiler checks for conflicts before generation.
 
 ## Security Requirements
 

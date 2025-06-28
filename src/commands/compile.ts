@@ -1,10 +1,9 @@
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { join, dirname } from 'path';
-import { DEFAULT_AI_DOCS_DIR, RULE_PREFIXES } from '../constants';
-import { getAiDocsDir, getIgnoreFilePath } from '../lib/file-utils';
-import { generateRuleFiles } from '../lib/rule-generator';
+import { existsSync } from 'fs';
+import { DEFAULT_AI_DOCS_DIR } from '../constants';
+import { getAiDocsDir } from '../lib/file-utils';
+import { compileRules, compileIgnore } from '../lib/compiler';
 
-export const compileRules = (): void => {
+export const compile = (): void => {
   const currentDir = process.cwd();
   const aiDocsDir = getAiDocsDir(currentDir);
 
@@ -15,24 +14,8 @@ export const compileRules = (): void => {
 
   console.log('🔄 Compiling rules...');
   try {
-    generateRuleFiles(aiDocsDir, currentDir);
-
-    const ignoreFilePath = join(aiDocsDir, 'ignore');
-    if (existsSync(ignoreFilePath)) {
-      const ignoreContent = readFileSync(ignoreFilePath, 'utf-8');
-
-      RULE_PREFIXES.forEach(prefix => {
-        const outputPath = getIgnoreFilePath(currentDir, prefix);
-
-        if (prefix === 'cursor') {
-          mkdirSync(dirname(outputPath), { recursive: true });
-        }
-
-        writeFileSync(outputPath, ignoreContent);
-        console.log(`📄 Generated: ${outputPath}`);
-      });
-    }
-
+    compileRules(aiDocsDir, currentDir);
+    compileIgnore(aiDocsDir, currentDir);
     console.log('✅ Rules compiled successfully!');
   } catch (error) {
     console.error('❌ Error compiling rules:', error);
