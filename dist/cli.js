@@ -110,8 +110,8 @@ var initProject = () => {
   console.log("Next steps:");
   console.log(`1. Edit rules: modify files in the ${DEFAULT_AI_DOCS_DIR}/${DEFAULT_RULES_DIR}/ directory`);
   console.log(`2. Edit ignore patterns: modify the ${DEFAULT_AI_DOCS_DIR}/ignore file`);
-  console.log("3. Compile: npx ai-rule-forge compile");
-  console.log("4. Preview: npx ai-rule-forge preview");
+  console.log("3. Compile: npx ai-docs compile");
+  console.log("4. Preview: npx ai-docs preview");
 };
 
 // src/commands/compile.ts
@@ -291,7 +291,7 @@ var compileRules = () => {
   const currentDir = process.cwd();
   const aiDocsDir = getAiDocsDir(currentDir);
   if (!existsSync3(aiDocsDir)) {
-    console.error(`❌ ${DEFAULT_AI_DOCS_DIR} directory not found. Please run ai-rule-forge init first.`);
+    console.error(`❌ ${DEFAULT_AI_DOCS_DIR} directory not found. Please run ai-docs init first.`);
     process.exit(1);
   }
   console.log("\uD83D\uDD04 Compiling rules...");
@@ -322,7 +322,7 @@ var previewRules2 = () => {
   const currentDir = process.cwd();
   const aiDocsDir = getAiDocsDir(currentDir);
   if (!existsSync4(aiDocsDir)) {
-    console.error(`❌ ${DEFAULT_AI_DOCS_DIR} directory not found. Please run ai-rule-forge init first.`);
+    console.error(`❌ ${DEFAULT_AI_DOCS_DIR} directory not found. Please run ai-docs init first.`);
     process.exit(1);
   }
   console.log("\uD83D\uDD0D Previewing rules...");
@@ -338,10 +338,10 @@ var previewRules2 = () => {
 // src/commands/help.ts
 var showHelp = () => {
   console.log(`
-ai-rule-forge CLI
+ai-docs-cli
 
 Usage:
-  npx ai-rule-forge <command>
+  npx ai-docs <command>
 
 Commands:
   init     - Initialize a new ${DEFAULT_AI_DOCS_DIR} project

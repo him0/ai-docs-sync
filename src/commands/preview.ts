@@ -8,7 +8,7 @@ export const previewRules = (): void => {
   const aiDocsDir = getAiDocsDir(currentDir);
 
   if (!existsSync(aiDocsDir)) {
-    console.error(`❌ ${DEFAULT_AI_DOCS_DIR} directory not found. Please run ai-rule-forge init first.`);
+    console.error(`❌ ${DEFAULT_AI_DOCS_DIR} directory not found. Please run ai-docs init first.`);
     process.exit(1);
   }
 

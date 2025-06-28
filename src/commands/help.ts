@@ -2,10 +2,10 @@ import { DEFAULT_AI_DOCS_DIR, DEFAULT_RULES_DIR } from '../constants';
 
 export const showHelp = (): void => {
   console.log(`
-ai-rule-forge CLI
+ai-docs-cli
 
 Usage:
-  npx ai-rule-forge <command>
+  npx ai-docs <command>
 
 Commands:
   init     - Initialize a new ${DEFAULT_AI_DOCS_DIR} project

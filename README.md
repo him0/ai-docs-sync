@@ -1,4 +1,4 @@
-# AI Rule Forge
+# AI Docs CLI
 
 AI Document Management. Manage rules and knowledge for GitHub Copilot, Cline, Cursor, and other AI tools.
 
@@ -6,7 +6,7 @@ AI Document Management. Manage rules and knowledge for GitHub Copilot, Cline, Cu
 
 ## Overview
 
-ai-rule-forge is a fast CLI tool built with Bun for managing rules and knowledge for AI tools (GitHub Copilot, Cline, Cursor, etc.).
+ai-docs-cli is a fast CLI tool built with Bun for managing rules and knowledge for AI tools (GitHub Copilot, Cline, Cursor, etc.).
 It allows you to generate configuration files for various AI tools from a single source.
 
 ## Installation
@@ -14,7 +14,7 @@ It allows you to generate configuration files for various AI tools from a single
 ### Quick Start (Recommended)
 
 ```bash
-npx ai-rule-forge init
+npx ai-docs-cli init
 ```
 
 ### Development with Bun
@@ -37,7 +37,7 @@ bun run build
 ### Initialize a New Project
 
 ```bash
-npx ai-rule-forge init
+npx ai-docs-cli init
 ```
 
 This command will:
@@ -56,7 +56,7 @@ You can use numeric prefixes (e.g., `01_security.md`) to control the order.
 ### Apply Rules
 
 ```bash
-npx ai-rule-forge compile
+npx ai-docs compile
 ```
 
 This command reads rule files from the `ai-docs/_rules/` directory and generates:
@@ -72,7 +72,7 @@ It also reads the `ai-docs/ignore` file and generates:
 ### Preview
 
 ```bash
-npx ai-rule-forge preview
+npx ai-docs preview
 ```
 
 This command previews the content of the files that will be generated.

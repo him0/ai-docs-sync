@@ -28,6 +28,6 @@ export const initProject = (): void => {
   console.log('Next steps:');
   console.log(`1. Edit rules: modify files in the ${DEFAULT_AI_DOCS_DIR}/${DEFAULT_RULES_DIR}/ directory`);
   console.log(`2. Edit ignore patterns: modify the ${DEFAULT_AI_DOCS_DIR}/ignore file`);
-  console.log('3. Compile: npx ai-rule-forge compile');
-  console.log('4. Preview: npx ai-rule-forge preview');
+  console.log('3. Compile: npx ai-docs compile');
+  console.log('4. Preview: npx ai-docs preview');
 };
