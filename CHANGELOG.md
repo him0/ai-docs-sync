@@ -17,3 +17,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated README.md examples to use `npx @him0/ai-docs-sync@latest`
 - Updated help command output to use `npx @him0/ai-docs-sync@latest`
+- Updated CLAUDE.md with correct npx commands
