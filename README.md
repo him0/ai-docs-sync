@@ -16,7 +16,7 @@ It allows you to generate configuration files for various AI tools from a single
 ### Quick Start (Recommended)
 
 ```bash
-npx @him0/ai-docs-sync init
+npx @him0/ai-docs-sync@latest init
 ```
 
 ### Development with Bun
@@ -38,7 +38,7 @@ bun run build
 ### Initialize a New Project
 
 ```bash
-npx @him0/ai-docs-sync init
+npx @him0/ai-docs-sync@latest init
 ```
 
 This command will:
@@ -54,7 +54,7 @@ You can use numeric prefixes (e.g., `01_security.md`) to control the order.
 ### Sync Rules
 
 ```bash
-npx @him0/ai-docs-sync
+npx @him0/ai-docs-sync@latest
 ```
 
 This command reads rule files from the `ai-docs/rules/` directory and generates:
@@ -70,7 +70,7 @@ It also reads the `ai-docs/ignore` file and generates:
 ### Preview Changes (Plan Mode)
 
 ```bash
-npx @him0/ai-docs-sync plan
+npx @him0/ai-docs-sync@latest plan
 ```
 
 This command previews the content of the files that will be generated without writing them to disk.
@@ -128,7 +128,7 @@ dist/
 *.log
 ```
 
-When you run `@him0/ai-docs-sync`, these patterns will be copied to:
+When you run `npx @him0/ai-docs-sync@latest`, these patterns will be copied to:
 - `.copilotignore` (for GitHub Copilot)
 - `.clineignore` (for Cline)
 - `.cursor/ignore` (for Cursor)
