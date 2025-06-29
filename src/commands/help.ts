@@ -5,7 +5,7 @@ export const showHelp = (): void => {
 ai-docs-sync
 
 Usage:
-  npx ai-docs-sync [command]
+  npx @him0/ai-docs-sync@latest [command]
 
 Commands:
   (default)  - Sync rules from ${DEFAULT_AI_DOCS_DIR}/${DEFAULT_RULES_DIR} to output files
@@ -14,8 +14,8 @@ Commands:
   help       - Show this help message
 
 Examples:
-  npx ai-docs-sync       # Sync rules (default behavior)
-  npx ai-docs-sync plan  # Preview changes without writing
-  npx ai-docs-sync init  # Initialize a new project
+  npx @him0/ai-docs-sync@latest       # Sync rules (default behavior)
+  npx @him0/ai-docs-sync@latest plan  # Preview changes without writing
+  npx @him0/ai-docs-sync@latest init  # Initialize a new project
   `);
 };

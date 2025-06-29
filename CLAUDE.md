@@ -11,9 +11,9 @@ AI Docs Sync is a CLI tool for synchronizing AI documentation rules across GitHu
 - `npm run build` - Compile TypeScript and make CLI executable
 - `npm run init` - Run init command in development
 - `npm run sync` - Run sync command in development
-- `ai-docs-sync` - Run sync command (default behavior)
-- `ai-docs-sync init` - Initialize new project
-- `ai-docs-sync plan` - Preview changes without writing files
+- `npx @him0/ai-docs-sync@latest` - Run sync command (default behavior)
+- `npx @him0/ai-docs-sync@latest init` - Initialize new project
+- `npx @him0/ai-docs-sync@latest plan` - Preview changes without writing files
 
 ## Architecture
 
