@@ -2,10 +2,10 @@ import { DEFAULT_AI_DOCS_DIR, DEFAULT_RULES_DIR } from '../constants';
 
 export const showHelp = (): void => {
   console.log(`
-ai-doc-sync
+ai-docs-sync
 
 Usage:
-  npx ai-doc-sync [command]
+  npx ai-docs-sync [command]
 
 Commands:
   (default)  - Sync rules from ${DEFAULT_AI_DOCS_DIR}/${DEFAULT_RULES_DIR} to output files
@@ -14,8 +14,8 @@ Commands:
   help       - Show this help message
 
 Examples:
-  npx ai-doc-sync       # Sync rules (default behavior)
-  npx ai-doc-sync plan  # Preview changes without writing
-  npx ai-doc-sync init  # Initialize a new project
+  npx ai-docs-sync       # Sync rules (default behavior)
+  npx ai-docs-sync plan  # Preview changes without writing
+  npx ai-docs-sync init  # Initialize a new project
   `);
 };
