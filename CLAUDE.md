@@ -4,23 +4,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AI Docs CLI is a CLI tool for managing rules and configuration files for various AI tools (GitHub Copilot, Cline, Cursor). It allows defining rules once in Markdown files and compiling them to different output formats.
+AI Doc Sync is a CLI tool for synchronizing AI documentation rules across GitHub Copilot, Cline, Cursor, and other AI tools. It allows defining rules once in Markdown files and syncing them to different output formats. By default (when run without subcommands), it executes the sync command.
 
 ## Common Commands
 
 - `npm run build` - Compile TypeScript and make CLI executable
-- `npm run init` - Run init command in development (via tsx)
-- `npm run compile` - Run compile command in development
-- `npm run preview` - Run preview command in development
+- `npm run init` - Run init command in development
+- `npm run sync` - Run sync command in development
+- `ai-doc-sync` - Run sync command (default behavior)
+- `ai-doc-sync init` - Initialize new project
+- `ai-doc-sync plan` - Preview changes without writing files
 
 ## Architecture
 
 ### Core CLI System
 - Main entry point: `src/cli.ts` - Single file containing all CLI logic
-- Commands: `init`, `compile`, `preview`, `help`
+- Commands: `init`, `plan`, `help` (default behavior is sync)
 - Template system: `src/templates/rules/` contains default rule templates
 
-### Rule Compilation Process
+### Rule Synchronization Process
 1. Reads Markdown files from `ai-docs/rules/` directory (sorted alphabetically)
 2. Loads all files into RuleFile objects (filename + content)
 3. Passes all rule files to each generator
@@ -43,14 +45,14 @@ AI Docs CLI is a CLI tool for managing rules and configuration files for various
 ## Project Structure
 
 - `src/cli.ts` - Main CLI entry point
-- `src/commands/` - Individual command implementations (init, compile, preview, help)
+- `src/commands/` - Individual command implementations (init, sync, help)
 - `src/lib/compiler.ts` - Core compilation orchestration
 - `src/lib/generators/` - Modular generator system for each AI tool
 - `src/templates/rules/` - Default rule templates for initialization
 - `ai-docs/rules/` - User's rule files (created by init)
 - `ai-docs/ignore` - Ignore patterns (copied to tool-specific ignore files)
 - `dist/` - Compiled TypeScript output
-- `package.json` - Defines CLI binary as `ai-docs`
+- `package.json` - Defines CLI binary as `ai-doc-sync`
 
 ## Legacy File Handling
 

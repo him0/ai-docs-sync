@@ -1,12 +1,12 @@
-# AI Docs CLI
+# AI Doc Sync
 
-A modular CLI tool for managing rules and configuration files for various AI tools (GitHub Copilot, Cline, Cursor). Define rules once in Markdown files and compile them to different output formats.
+A fast CLI tool for synchronizing AI documentation rules across GitHub Copilot, Cline, Cursor, and other AI tools. Define rules once in Markdown files and sync them to different output formats.
 
 **Fast CLI built with Bun, compatible with Node.js and available via npx.**
 
 ## Overview
 
-AI Docs CLI is a fast CLI tool built with Bun for managing rules and knowledge for AI tools (GitHub Copilot, Cline, Cursor, etc.).
+AI Doc Sync is a fast CLI tool built with Bun for synchronizing rules and knowledge across AI tools (GitHub Copilot, Cline, Cursor, etc.).
 It allows you to generate configuration files for various AI tools from a single source with a modular generator architecture.
 
 ## Installation
@@ -14,7 +14,7 @@ It allows you to generate configuration files for various AI tools from a single
 ### Quick Start (Recommended)
 
 ```bash
-npx ai-docs-cli init
+npx ai-doc-sync init
 ```
 
 ### Development with Bun
@@ -25,8 +25,7 @@ bun install
 
 # Development commands
 bun run init              # Initialize project
-bun run compile           # Compile rules
-bun run preview           # Preview rules
+bun run sync              # Sync rules to output files
 
 # Build for distribution
 bun run build
@@ -37,7 +36,7 @@ bun run build
 ### Initialize a New Project
 
 ```bash
-npx ai-docs-cli init
+npx ai-doc-sync init
 ```
 
 This command will:
@@ -50,10 +49,10 @@ This command will:
 Edit Markdown files in the `ai-docs/rules/` directory to define rules for AI tools.
 You can use numeric prefixes (e.g., `01_security.md`) to control the order.
 
-### Compile Rules
+### Sync Rules
 
 ```bash
-npx ai-docs-cli compile
+npx ai-doc-sync
 ```
 
 This command reads rule files from the `ai-docs/rules/` directory and generates:
@@ -66,10 +65,10 @@ It also reads the `ai-docs/ignore` file and generates:
 - `.clineignore` (for Cline)
 - `.cursor/ignore` (for Cursor)
 
-### Preview Rules
+### Preview Changes (Plan Mode)
 
 ```bash
-npx ai-docs-cli preview
+npx ai-doc-sync plan
 ```
 
 This command previews the content of the files that will be generated without writing them to disk.
@@ -127,7 +126,7 @@ dist/
 *.log
 ```
 
-When you run the `compile` command, these patterns will be copied to:
+When you run `ai-doc-sync`, these patterns will be copied to:
 - `.copilotignore` (for GitHub Copilot)
 - `.clineignore` (for Cline)
 - `.cursor/ignore` (for Cursor)
