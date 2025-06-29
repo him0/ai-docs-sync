@@ -1,4 +1,4 @@
-# AI Doc Sync
+# AI Docs Sync
 
 A fast CLI tool for synchronizing AI documentation rules across GitHub Copilot, Cline, Cursor, and other AI tools. Define rules once in Markdown files and sync them to different output formats.
 
@@ -8,7 +8,7 @@ A fast CLI tool for synchronizing AI documentation rules across GitHub Copilot, 
 
 ## Overview
 
-AI Doc Sync is a fast CLI tool built with Bun for synchronizing rules and knowledge across AI tools (GitHub Copilot, Cline, Cursor, etc.).
+AI Docs Sync is a fast CLI tool built with Bun for synchronizing rules and knowledge across AI tools (GitHub Copilot, Cline, Cursor, etc.).
 It allows you to generate configuration files for various AI tools from a single source with a modular generator architecture.
 
 ## Installation
@@ -16,7 +16,7 @@ It allows you to generate configuration files for various AI tools from a single
 ### Quick Start (Recommended)
 
 ```bash
-npx ai-doc-sync init
+npx @him0/ai-docs-sync init
 ```
 
 ### Development with Bun
@@ -38,7 +38,7 @@ bun run build
 ### Initialize a New Project
 
 ```bash
-npx ai-doc-sync init
+npx @him0/ai-docs-sync init
 ```
 
 This command will:
@@ -54,7 +54,7 @@ You can use numeric prefixes (e.g., `01_security.md`) to control the order.
 ### Sync Rules
 
 ```bash
-npx ai-doc-sync
+npx @him0/ai-docs-sync
 ```
 
 This command reads rule files from the `ai-docs/rules/` directory and generates:
@@ -70,7 +70,7 @@ It also reads the `ai-docs/ignore` file and generates:
 ### Preview Changes (Plan Mode)
 
 ```bash
-npx ai-doc-sync plan
+npx @him0/ai-docs-sync plan
 ```
 
 This command previews the content of the files that will be generated without writing them to disk.
@@ -128,7 +128,7 @@ dist/
 *.log
 ```
 
-When you run `ai-doc-sync`, these patterns will be copied to:
+When you run `@him0/ai-docs-sync`, these patterns will be copied to:
 - `.copilotignore` (for GitHub Copilot)
 - `.clineignore` (for Cline)
 - `.cursor/ignore` (for Cursor)
