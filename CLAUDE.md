@@ -4,16 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AI Doc Sync is a CLI tool for synchronizing AI documentation rules across GitHub Copilot, Cline, Cursor, and other AI tools. It allows defining rules once in Markdown files and syncing them to different output formats. By default (when run without subcommands), it executes the sync command.
+AI Docs Sync is a CLI tool for synchronizing AI documentation rules across GitHub Copilot, Cline, Cursor, and other AI tools. It allows defining rules once in Markdown files and syncing them to different output formats. By default (when run without subcommands), it executes the sync command.
 
 ## Common Commands
 
 - `npm run build` - Compile TypeScript and make CLI executable
 - `npm run init` - Run init command in development
 - `npm run sync` - Run sync command in development
-- `ai-doc-sync` - Run sync command (default behavior)
-- `ai-doc-sync init` - Initialize new project
-- `ai-doc-sync plan` - Preview changes without writing files
+- `ai-docs-sync` - Run sync command (default behavior)
+- `ai-docs-sync init` - Initialize new project
+- `ai-docs-sync plan` - Preview changes without writing files
 
 ## Architecture
 
@@ -52,7 +52,7 @@ AI Doc Sync is a CLI tool for synchronizing AI documentation rules across GitHub
 - `ai-docs/rules/` - User's rule files (created by init)
 - `ai-docs/ignore` - Ignore patterns (copied to tool-specific ignore files)
 - `dist/` - Compiled TypeScript output
-- `package.json` - Defines CLI binary as `ai-doc-sync`
+- `package.json` - Defines CLI binary as `ai-docs-sync`
 
 ## Legacy File Handling
 

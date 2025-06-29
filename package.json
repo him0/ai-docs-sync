@@ -1,17 +1,25 @@
 {
-  "name": "ai-doc-sync",
+  "name": "@him0/ai-docs-sync",
   "version": "0.3.0",
   "type": "module",
   "description": "Sync AI documentation rules across GitHub Copilot, Cline, Cursor, and other AI tools.",
   "author": "him0",
   "license": "MIT",
-  "keywords": ["ai", "copilot", "cline", "cursor", "rules", "sync", "cli"],
+  "keywords": [
+    "ai",
+    "copilot",
+    "cline",
+    "cursor",
+    "rules",
+    "sync",
+    "cli"
+  ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/him0/ai-doc-sync.git"
+    "url": "git+https://github.com/him0/ai-docs-sync.git"
   },
   "bin": {
-    "ai-doc-sync": "./dist/cli.js"
+    "ai-docs-sync": "dist/cli.js"
   },
   "files": [
     "dist",
