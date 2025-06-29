@@ -4,6 +4,8 @@ A fast CLI tool for synchronizing AI documentation rules across GitHub Copilot, 
 
 **Fast CLI built with Bun, compatible with Node.js and available via npx.**
 
+> **Note**: This project was formerly known as `ai-rule-forge`. The repository has been renamed to `ai-doc-sync` to better reflect its purpose of synchronizing AI documentation across multiple tools.
+
 ## Overview
 
 AI Doc Sync is a fast CLI tool built with Bun for synchronizing rules and knowledge across AI tools (GitHub Copilot, Cline, Cursor, etc.).
