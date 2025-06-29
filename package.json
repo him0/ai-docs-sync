@@ -1,6 +1,6 @@
 {
   "name": "@him0/ai-docs-sync",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "description": "Sync AI documentation rules across GitHub Copilot, Cline, Cursor, and other AI tools.",
   "author": "him0",
@@ -34,10 +34,10 @@
   },
   "scripts": {
     "dev": "bun run src/cli.ts",
-    "build": "bun build src/cli.ts --target=node --outfile=dist/cli.js && bun run build:types && cp -r src/templates dist/ && chmod +x ./dist/cli.js",
+    "build": "bun build src/cli.ts --target=node --outfile=dist/cli.js --header='#!/usr/bin/env node' && bun run build:types && cp -r src/templates dist/ && chmod +x ./dist/cli.js",
     "build:types": "tsc --emitDeclarationOnly",
     "init": "bun run src/cli.ts init",
-    "sync": "bun run src/cli.ts sync",
+    "sync": "bun run src/cli.ts",
     "plan": "bun run src/cli.ts plan",
     "prepublishOnly": "bun run build",
     "test": "bun test",
