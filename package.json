@@ -37,8 +37,8 @@
     "build": "bun build src/cli.ts --target=node --outfile=dist/cli.js && bun run build:types && cp -r src/templates dist/ && chmod +x ./dist/cli.js",
     "build:types": "tsc --emitDeclarationOnly",
     "init": "bun run src/cli.ts init",
-    "compile": "bun run src/cli.ts compile",
-    "preview": "bun run src/cli.ts preview",
+    "sync": "bun run src/cli.ts sync",
+    "plan": "bun run src/cli.ts plan",
     "prepublishOnly": "bun run build",
     "test": "bun test",
     "typecheck": "tsc --noEmit"
