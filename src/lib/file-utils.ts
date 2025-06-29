@@ -1,7 +1,8 @@
 import { existsSync, mkdirSync, copyFileSync, writeFileSync, readdirSync, statSync } from 'fs';
 import { join, dirname } from 'path';
-import type { OutputPaths, RulePrefix, LegacyFile } from '../constants';
+import type { OutputPaths, RulePrefix } from '../constants';
 import { DEFAULT_AI_DOCS_DIR, DEFAULT_RULES_DIR } from '../constants';
+import type { LegacyFile } from './generators/types';
 
 // File operation utilities
 export const ensureDir = (dir: string): void => {

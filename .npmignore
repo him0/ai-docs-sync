@@ -1,0 +1,35 @@
+# Source files
+src/
+!src/templates/
+
+# Development files
+tsconfig.json
+.gitignore
+bun.lockb
+pnpm-lock.yaml
+
+# Documentation and project files
+*.md
+!README.md
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test and development artifacts
+ai-docs/
+*.tgz
+
+# Logs and caches
+*.log
+.cache/
+coverage/
+
+# Environment files
+.env*
+
+# System files
+.DS_Store
+Thumbs.db

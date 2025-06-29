@@ -1,11 +1,4 @@
 # Security
-## Sensitive Files
-DO NOT read or modify:
--   .env files
--   \*_/config/secrets._
--   \*_/_.pem
--   Any file containing API keys, tokens, or credentials
-## Security Practices
--   Never commit sensitive files
--   Use environment variables for secrets
--   Keep credentials out of logs and output
+
+Never access or modify sensitive files like .env, API keys, certificates, or any files containing credentials.
+
